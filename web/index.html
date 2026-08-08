@@ -133,6 +133,95 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
 @media (pointer: fine) {
   .quick-actions button { flex: none; min-width: auto; padding: 8px 18px; }
 }
+
+/* kun: answer focus + profile switch */
+.profile-bar { display:flex; gap:6px; padding:8px 12px 0; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.profile-chip { padding:7px 12px; border-radius:9999px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:0.78rem; font-weight:600; white-space:nowrap; cursor:pointer; min-height:36px; }
+.profile-chip.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+.profile-chip.offline { opacity:0.75; }
+.term-toolbar { display:flex; align-items:center; justify-content:flex-end; padding:4px 12px; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+.term-toolbar label { font-size:0.72rem; color:var(--muted); display:flex; align-items:center; gap:6px; user-select:none; }
+.term-toolbar input { accent-color: var(--blue); }
+.term-line-noise { color: color-mix(in srgb, var(--term-text) 45%, transparent); }
+.term-fold { margin: 6px 0; border:1px solid color-mix(in srgb, var(--term-text) 18%, transparent); border-radius:8px; overflow:hidden; }
+.term-fold > summary { cursor:pointer; list-style:none; padding:6px 8px; color:var(--muted); font-size:0.72rem; background: color-mix(in srgb, var(--term-text) 6%, transparent); }
+.term-fold > summary::-webkit-details-marker { display:none; }
+.term-fold[open] > summary { border-bottom:1px solid color-mix(in srgb, var(--term-text) 12%, transparent); }
+.term-fold pre { margin:0; padding:8px; white-space:pre-wrap; word-break:break-all; color: color-mix(in srgb, var(--term-text) 80%, transparent); font: inherit; }
+.term-fold-cmd { border-color: color-mix(in srgb, var(--orange) 35%, transparent); }
+.term-fold-cmd > summary { color: var(--orange); }
+.term-keep { white-space: pre-wrap; word-break: break-word; color: color-mix(in srgb, var(--term-text) 72%, transparent); }
+.term-answer { white-space: pre-wrap; word-break: break-word; color: var(--term-text); font-size: 0.9rem; line-height: 1.55; margin: 8px 0; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--term-text) 7%, transparent); border-left: 3px solid color-mix(in srgb, var(--green) 75%, transparent); }
+.term-user { white-space: pre-wrap; word-break: break-word; color: var(--term-text); font-size: 0.9rem; line-height: 1.55; margin: 8px 0; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--blue) 14%, transparent); border-left: 3px solid var(--blue); }
+.term-role { display:block; font-size:0.68rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:4px; opacity:0.75; }
+.term-user .term-role { color: var(--blue); }
+.term-answer .term-role { color: var(--green); }
+.term-meta { white-space: pre-wrap; word-break: break-word; color: color-mix(in srgb, var(--term-text) 40%, transparent); font-size: 0.72rem; margin-top: 8px; }
+.term-status { display:none; flex-shrink:0; padding:8px 12px; border-top:1px solid var(--border); background: color-mix(in srgb, var(--surface) 92%, var(--term-bg)); font-size:0.72rem; line-height:1.45; color:var(--muted); gap:6px; flex-wrap:wrap; align-items:center; }
+.term-status.show { display:flex; }
+.term-status .chip { display:inline-flex; align-items:center; max-width:100%; padding:3px 8px; border-radius:9999px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.term-status .chip.model { border-color: color-mix(in srgb, var(--blue) 40%, var(--border)); color: var(--blue); }
+.term-status .chip.ctx { border-color: color-mix(in srgb, var(--orange) 40%, var(--border)); }
+.term-status .chip.path { max-width: 100%; flex: 1 1 auto; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* composer: send always easy to hit; secondary tools tucked away */
+.term-input { border-top: 1px solid var(--border); padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; background: var(--surface); flex-shrink: 0; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+.composer-row { display: flex; gap: 8px; align-items: flex-end; width: 100%; }
+.composer-row textarea { flex: 1; min-width: 0; min-height: 44px; max-height: 120px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-family: inherit; line-height: 1.35; resize: none; }
+.composer-send { flex-shrink: 0; min-width: 72px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: none; background: var(--blue); color: #fff; font-weight: 700; font-size: 15px; }
+.composer-send:active { transform: scale(0.98); }
+.composer-tools { display: flex; gap: 6px; }
+.composer-tools button { min-width: 40px; min-height: 36px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-size: 13px; font-weight: 600; }
+.last-sent { display: none; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 8px; border: 1px dashed var(--border); background: color-mix(in srgb, var(--blue) 6%, var(--bg)); }
+.last-sent.show { display: flex; }
+.last-sent .txt { flex: 1; min-width: 0; font-size: 0.75rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.last-sent button { flex-shrink: 0; border: none; background: none; color: var(--blue); font-size: 0.75rem; font-weight: 600; padding: 6px 4px; min-height: 32px; }
+.agent .meta-tab { color: var(--blue); font-weight: 600; }
+
+.history-sheet { display:none; position:fixed; inset:0; z-index:120; }
+.history-sheet.show { display:block; }
+.history-sheet .mask { position:absolute; inset:0; background:rgba(0,0,0,0.45); }
+.history-sheet .panel { position:absolute; left:0; right:0; bottom:0; max-height:70dvh; background:var(--surface); border-top-left-radius:16px; border-top-right-radius:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; padding-bottom:env(safe-area-inset-bottom,8px); }
+.history-sheet .hd { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.history-sheet .hd b { flex:1; font-size:0.9rem; }
+.history-sheet .hd button { border:none; background:none; color:var(--muted); font-size:1.2rem; min-width:40px; min-height:40px; }
+.history-sheet .list { overflow-y:auto; padding:8px 12px; -webkit-overflow-scrolling:touch; }
+.history-item { width:100%; text-align:left; border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:0.85rem; line-height:1.45; }
+.history-item .n { display:block; font-size:0.68rem; color:var(--blue); font-weight:700; margin-bottom:4px; }
+.history-item .b { display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; word-break:break-word; }
+.history-empty { text-align:center; color:var(--muted); padding:28px 12px; font-size:0.85rem; }
+.model-sheet { display:none; position:fixed; inset:0; z-index:120; }
+.model-sheet.show { display:block; }
+.model-sheet .mask { position:absolute; inset:0; background:rgba(0,0,0,0.45); }
+.model-sheet .panel { position:absolute; left:0; right:0; bottom:0; max-height:75dvh; background:var(--surface); border-top-left-radius:16px; border-top-right-radius:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; padding-bottom:env(safe-area-inset-bottom,8px); }
+.model-sheet .hd { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.model-sheet .hd b { flex:1; font-size:0.9rem; }
+.model-sheet .hd button { border:none; background:none; color:var(--muted); font-size:1.2rem; min-width:40px; min-height:40px; }
+.model-sheet .search { margin:8px 12px; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:16px; }
+.model-sheet .list { overflow-y:auto; padding:4px 12px 12px; -webkit-overflow-scrolling:touch; }
+.model-item { width:100%; text-align:left; border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:10px; padding:10px 12px; margin-bottom:6px; }
+.model-item .id { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:0.82rem; font-weight:600; color:var(--blue); }
+.model-item .prov { font-size:0.7rem; color:var(--muted); margin-top:2px; }
+
+
+.term-status .chip.todo { border-color: color-mix(in srgb, var(--green) 45%, var(--border)); color: var(--green); font-weight: 700; cursor: pointer; }
+.todo-sheet { display:none; position:fixed; inset:0; z-index:120; }
+.todo-sheet.show { display:block; }
+.todo-sheet .mask { position:absolute; inset:0; background:rgba(0,0,0,0.45); }
+.todo-sheet .panel { position:absolute; left:0; right:0; bottom:0; max-height:70dvh; background:var(--surface); border-top-left-radius:16px; border-top-right-radius:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; padding-bottom:env(safe-area-inset-bottom,8px); }
+.todo-sheet .hd { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.todo-sheet .hd b { flex:1; font-size:0.9rem; }
+.todo-sheet .hd button { border:none; background:none; color:var(--muted); font-size:1.2rem; min-width:40px; min-height:40px; }
+.todo-sheet .body { overflow-y:auto; padding:10px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:0.78rem; line-height:1.45; color:var(--text); -webkit-overflow-scrolling:touch; white-space:pre-wrap; word-break:break-word; }
+.todo-sheet .sum { font-size:0.75rem; color:var(--muted); padding:0 16px 8px; }
+.todo-item { padding:4px 0; }
+.todo-item.done { color: color-mix(in srgb, var(--text) 55%, transparent); }
+.todo-item.active { color: var(--green); font-weight: 600; }
+.todo-item.open { color: var(--text); }
+
+
+
+.offline-banner { margin:16px 12px; padding:16px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--muted); text-align:center; font-size:0.9rem; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -141,10 +230,12 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
   <span class="dot" id="statusDot"></span>
   <h1>herdr</h1>
   <span id="connLabel" style="font-size:0.65rem;font-weight:500"></span>
+  <span id="profileLabel" style="font-size:0.65rem;color:var(--muted);margin-left:6px"></span>
   <span id="agentCount" style="font-size:0.7rem;color:var(--muted);margin-left:auto"></span>
   <button onclick="toggleTimeline()" aria-label="Timeline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
   <button onclick="toggleSettings()" aria-label="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
 </div>
+<div class="profile-bar" id="profileBar"></div>
 
 <div class="settings" id="settingsView">
   <h2>Settings</h2>
@@ -157,6 +248,20 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
     <div class="hint">Run <code>./relay/start.sh</code> to get a URL. <a href="https://github.com/dcolinmorgan/herdr-remote/blob/main/QUICKSTART.md" style="color:var(--blue)">Setup guide →</a></div>
   </div>
 
+
+  <div class="setting-group">
+    <label>Machines (Pro / Air)</label>
+    <div class="hint" style="margin-bottom:8px">两套固定入口；顶部可切换。离线时会明确提示。</div>
+    <label for="proHost">Pro host</label>
+    <input id="proHost" type="text" placeholder="macbook-pro.example.com" />
+    <label for="proToken" style="margin-top:8px">Pro token</label>
+    <input id="proToken" type="password" placeholder="Pro relay token" />
+    <label for="airHost" style="margin-top:8px">Air host</label>
+    <input id="airHost" type="text" placeholder="macbook-air.example.com" />
+    <label for="airToken" style="margin-top:8px">Air token</label>
+    <input id="airToken" type="password" placeholder="Air relay token" />
+    <button onclick="saveProfiles()">Save machines</button>
+  </div>
   <div class="setting-group">
     <label>Push Notifications</label>
     <div id="pushStatus" style="font-size:0.75rem;margin-bottom:6px"></div>
@@ -183,14 +288,47 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
     <span class="title" id="termTitle"></span>
     <button class="refresh-btn" onclick="refreshPane()" aria-label="Refresh pane"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg></button>
   </div>
+  <div class="term-toolbar">
+    <label><input type="checkbox" id="thinFilterToggle" checked onchange="toggleThinFilter(this.checked)"> 只看回答</label>
+  </div>
   <div class="term-content" id="termContent">Loading…</div>
+  <div class="term-status" id="termStatus"></div>
   <div class="quick-actions" id="quickActions"></div>
   <div class="term-input">
-    <button onclick="openCommandPalette()" aria-label="Commands" style="padding:10px 12px;border-radius:6px;border:1px solid var(--blue);background:var(--bg);color:var(--blue);font-weight:700;font-size:14px;flex-shrink:0">/</button>
-    <input id="termInput" placeholder="Type…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-    <button onclick="toggleQuickDock()" aria-label="Quick actions" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--orange);flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
-    <button onclick="toggleKeysDock()" aria-label="Keys" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"/></svg></button>
-    <button onclick="sendText()" aria-label="Send" style="padding:10px 14px;border-radius:6px;border:none;background:var(--blue);color:#fff;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+    <div class="composer-row">
+      <textarea id="termInput" rows="1" placeholder="输入消息…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <button type="button" class="composer-send" onclick="sendText()" aria-label="发送">发送</button>
+    </div>
+    <div class="composer-tools">
+      <button type="button" onclick="openMessageHistory()" aria-label="历史消息">历史</button>
+      <button type="button" onclick="openModelPicker()" aria-label="切换模型">模型</button>
+      <button type="button" onclick="openCommandPalette()" aria-label="Commands">/</button>
+      <button type="button" onclick="toggleQuickDock()" aria-label="Quick actions">⚡</button>
+      <button type="button" onclick="toggleKeysDock()" aria-label="Keys">⌨</button>
+    </div>
+  </div>
+  <div class="history-sheet" id="historySheet">
+    <div class="mask" onclick="closeMessageHistory()"></div>
+    <div class="panel">
+      <div class="hd"><b>你的历史消息</b><button type="button" onclick="closeMessageHistory()" aria-label="关闭">✕</button></div>
+      <div class="list" id="historyList"></div>
+    </div>
+  </div>
+  <div class="todo-sheet" id="todoSheet">
+    <div class="mask" onclick="closeTodoSheet()"></div>
+    <div class="panel">
+      <div class="hd"><b id="todoTitle">TODO</b><button type="button" onclick="closeTodoSheet()" aria-label="关闭">✕</button></div>
+      <div class="sum" id="todoSummary"></div>
+      <div class="body" id="todoBody"></div>
+    </div>
+  </div>
+  <div class="model-sheet" id="modelSheet">
+    <div class="mask" onclick="closeModelPicker()"></div>
+    <div class="panel">
+      <div class="hd"><b>切换模型</b><button type="button" onclick="closeModelPicker()" aria-label="关闭">✕</button></div>
+      <input class="search" id="modelSearch" type="search" placeholder="搜索模型…" autocomplete="off" autocorrect="off" oninput="filterModelPicker()" />
+      <div class="list" id="modelList"></div>
+    </div>
   </div>
   <div class="term-keys" id="termKeys" style="display:none">
     <!-- Key queue strip (visible when composing) -->
@@ -330,20 +468,52 @@ function saveAndConnect() {
 }
 
 // Connection
+let connGen = 0;
+let reconnectTimer = null;
 function connect() {
   let url = localStorage.getItem('herdr_relay_url') || (isSelfRelay ? autoRelayUrl : (isDemo ? DEMO_RELAY : ''));
   if (!url) { showSetup(); return; }
-  if (ws) ws.close();
+  // cancel pending reconnect from a previous socket
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  const gen = ++connGen;
+  // drop old socket without treating its close as "current offline"
+  if (ws) {
+    try { ws.onopen = ws.onclose = ws.onerror = ws.onmessage = null; ws.close(); } catch (_) {}
+    ws = null;
+  }
   setStatus('connecting');
-  // Append token as query param if stored separately
+  offlineMode = false;
   const token = localStorage.getItem('herdr_relay_token');
   let wsUrl = url;
   if (token) wsUrl += (url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(token);
-  ws = new WebSocket(wsUrl);
-  ws.onopen = () => { setStatus('connected'); if(window.cue) cue('ready'); };
-  ws.onclose = () => { setStatus('disconnected'); setTimeout(connect, 3000); };
-  ws.onerror = () => setStatus('disconnected');
-  ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
+  const socket = new WebSocket(wsUrl);
+  ws = socket;
+  socket.onopen = () => {
+    if (gen !== connGen || ws !== socket) return;
+    offlineMode = false;
+    setStatus('connected');
+    if (window.cue) cue('ready');
+    renderProfileBar();
+  };
+  socket.onclose = () => {
+    if (gen !== connGen || ws !== socket) return; // stale close from switched profile
+    setStatus('disconnected');
+    // only show offline if still this generation and not reconnected soon
+    setTimeout(() => {
+      if (gen === connGen && (!ws || ws.readyState !== 1)) showOffline(activeProfile());
+    }, 2500);
+    reconnectTimer = setTimeout(() => {
+      if (gen === connGen) connect();
+    }, 3000);
+  };
+  socket.onerror = () => {
+    if (gen !== connGen || ws !== socket) return;
+    setStatus('disconnected');
+  };
+  socket.onmessage = (e) => {
+    if (gen !== connGen || ws !== socket) return;
+    handleMessage(JSON.parse(e.data));
+  };
 }
 
 function setStatus(s) {
@@ -413,9 +583,8 @@ function handleMessage(msg) {
     const el = document.getElementById('termContent');
     const prevHeight = el.scrollHeight;
     const prevScroll = el.scrollTop;
-    el.textContent = msg.content || '(empty)';
+    renderPaneContent(el, msg.content || '(empty)');
     if (userScrolledUp) {
-      // Keep scroll position relative to bottom (content may have grown at top)
       const growth = el.scrollHeight - prevHeight;
       el.scrollTop = prevScroll + growth;
     } else {
@@ -464,7 +633,7 @@ function renderWorkspaces(workspaces) {
     wsTabs.forEach((tid, i) => {
       const tabAgents = agents.filter(a => a.tab_id === tid);
       const hasBlocked = tabAgents.some(a => a.status === 'blocked');
-      const tabLabel = tabAgents[0]?.label || 'Tab '+(i+1);
+      const tabLabel = tabAgents[0]?.tab_label || tabAgents[0]?.label || 'Tab '+(i+1);
       html += `<button class="chip${activeTab===tid?' active':''}${hasBlocked?' alert':''}" onclick="selectTab('${tid}')">${tabLabel}</button>`;
     });
     html += `<button class="chip chip-add" onclick="createTab('${activeWorkspace}')">+</button>`;
@@ -514,11 +683,19 @@ function agentCard(a) {
   const color = a.status==='blocked'?'var(--red)':a.status==='working'?'var(--green)':'var(--muted)';
   const pulseClass = a.status==='working'?' pulse':'';
   const host = a.host&&a.host!=='local'?` <span style="color:var(--orange);font-size:0.6rem">@${a.host}</span>`:'';
-  const cwd = a.cwd ? `<span style="font-family:monospace;opacity:0.7">${a.cwd.split('/').slice(-2).join('/')}</span>` : '';
-  const label = a.label||a.project||a.agent;
-  return `<div class="agent${a.status==='blocked'?' blocked':''}" role="button" tabindex="0" aria-label="${label}, ${a.status}" onclick="openTerminal('${a.pane_id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTerminal('${a.pane_id}')}">
+  const cwd = a.cwd ? a.cwd.split('/').slice(-2).join('/') : '';
+  const tabName = (a.tab_label || a.label || '').trim();
+  const spaceName = (a.project || '').trim();
+  // Title prefers tab name (user-renamed), then project/space
+  const title = tabName || spaceName || a.agent || a.pane_id;
+  const metaParts = [];
+  if (tabName && spaceName && tabName !== spaceName) metaParts.push(spaceName);
+  if (a.agent) metaParts.push(a.agent);
+  if (cwd) metaParts.push(cwd);
+  const meta = metaParts.join(' · ');
+  return `<div class="agent${a.status==='blocked'?' blocked':''}" role="button" tabindex="0" aria-label="${title}, ${a.status}" onclick="openTerminal('${a.pane_id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTerminal('${a.pane_id}')}">
     <span class="dot${pulseClass}" style="background:${color}" aria-hidden="true"></span>
-    <div class="info"><div class="project">${label}${host}</div><div class="meta">${a.agent} · ${cwd}</div></div>
+    <div class="info"><div class="project">${tabName ? `<span class="meta-tab">${tabName}</span>` : title}${host}</div><div class="meta">${meta}</div></div>
     <span style="color:var(--muted);font-size:1.2rem" aria-hidden="true">›</span>
   </div>`;
 }
@@ -531,7 +708,7 @@ function section(title, color, list) {
 function openTerminal(paneId) {
   activePane = paneId; paneLines = 200; userScrolledUp = false;
   const a = agents.find(x => x.pane_id===paneId);
-  document.getElementById('termTitle').textContent = a?`${a.label||a.project} · ${a.agent}`:paneId;
+  document.getElementById('termTitle').textContent = a?`${a.tab_label||a.label||a.project||'agent'} · ${a.agent||''}`.replace(/\s·\s$/,''):paneId;
   document.getElementById('agentListView').style.display = 'none';
   document.getElementById('terminalView').classList.add('active');
   const qa = document.getElementById('quickActions');
@@ -562,13 +739,94 @@ function closeTerminal() {
 let paneLines = 200;
 function refreshPane() { if(ws&&activePane) ws.send(JSON.stringify({type:'read_pane',pane_id:activePane,lines:paneLines})); }
 function loadMore() { paneLines = Math.min(paneLines + 500, 5000); refreshPane(); }
-function sendText() {
-  const i=document.getElementById('termInput');
-  if(!i.value||!ws||!activePane)return;
-  ws.send(JSON.stringify({type:'send_text',pane_id:activePane,text:i.value}));
-  ws.send(JSON.stringify({type:'send_keys',pane_id:activePane,keys:['Enter']}));
-  i.value=''; setTimeout(refreshPane,500);
+let userMessageHistory = []; // strings, newest last
+let currentTodos = null; // {summary, lines, done, total}
+let selectedModel = null; // {ref, id, provider, label} optimistic + last seen
+let lastFooterLines = [];
+let editingFromHistory = false; // next send tries agent-native edit path (Esc Esc)
+
+function resizeComposer() {
+  const i = document.getElementById('termInput');
+  if (!i) return;
+  i.style.height = 'auto';
+  i.style.height = Math.min(120, Math.max(44, i.scrollHeight)) + 'px';
 }
+function setComposerText(text, {editMode=false, focus=true} = {}) {
+  const i = document.getElementById('termInput');
+  if (!i) return;
+  i.value = text || '';
+  editingFromHistory = !!editMode;
+  resizeComposer();
+  if (focus) {
+    i.focus();
+    const n = i.value.length;
+    try { i.setSelectionRange(n, n); } catch (_) {}
+  }
+}
+function openMessageHistory() {
+  const sheet = document.getElementById('historySheet');
+  const list = document.getElementById('historyList');
+  if (!sheet || !list) return;
+  const items = userMessageHistory.slice().reverse(); // newest first
+  if (!items.length) {
+    list.innerHTML = '<div class="history-empty">还没有解析到你的历史消息。<br/>开着「只看回答」看一会儿对话后再试。</div>';
+  } else {
+    list.innerHTML = items.map((t, idx) => {
+      const realIndex = items.length - 1 - idx; // index in newest-first list not needed
+      const safe = escHtml(t);
+      // encode via data attribute using base64 to avoid quote issues
+      const b64 = btoa(unescape(encodeURIComponent(t)));
+      return `<button type="button" class="history-item" onclick="pickHistoryMessage('${b64}')"><span class="n">#${items.length - idx}</span><span class="b">${safe}</span></button>`;
+    }).join('');
+  }
+  sheet.classList.add('show');
+}
+function closeMessageHistory() {
+  const sheet = document.getElementById('historySheet');
+  if (sheet) sheet.classList.remove('show');
+}
+function pickHistoryMessage(b64) {
+  let text = '';
+  try { text = decodeURIComponent(escape(atob(b64))); } catch (_) { text = ''; }
+  closeMessageHistory();
+  if (!text) return;
+  // Align with desktop: double Esc enters message edit/select flow in Pi TUI,
+  // then we stage the chosen text for you to edit and resend.
+  if (ws && activePane) {
+    try {
+      ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Escape']}));
+      setTimeout(() => {
+        try { ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Escape']})); } catch(_){}
+      }, 80);
+    } catch (_) {}
+  }
+  setComposerText(text, { editMode: true, focus: true });
+  setTimeout(refreshPane, 300);
+}
+function sendText() {
+  const i = document.getElementById('termInput');
+  if (!i || !ws || !activePane) return;
+  const text = (i.value || '').trim();
+  if (!text) return;
+  const fromHistory = editingFromHistory;
+  editingFromHistory = false;
+  // If editing a past user message: one more Esc to settle agent UI, then type+Enter.
+  // Desktop flow is Esc Esc → pick → edit → send; pick already did Esc Esc.
+  if (fromHistory) {
+    try { ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Escape']})); } catch(_){}
+  }
+  ws.send(JSON.stringify({type:'send_text', pane_id: activePane, text}));
+  ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Enter']}));
+  // keep local history immediately (pane parse will refresh later)
+  if (!userMessageHistory.length || userMessageHistory[userMessageHistory.length - 1] !== text) {
+    userMessageHistory.push(text);
+    if (userMessageHistory.length > 50) userMessageHistory = userMessageHistory.slice(-50);
+  }
+  i.value = '';
+  resizeComposer();
+  setTimeout(refreshPane, 500);
+}
+
 function sendKey(k){if(!ws||!activePane)return;ws.send(JSON.stringify({type:'send_keys',pane_id:activePane,keys:[k]}));setTimeout(refreshPane,300);}
 function sendKeys(k){if(!ws||!activePane)return;ws.send(JSON.stringify({type:'send_keys',pane_id:activePane,keys:k}));setTimeout(refreshPane,300);}
 
@@ -714,14 +972,40 @@ function pressCtrl(label) {
 function toggleArrows(){}
 function hideArrows(){}
 function respond(t){if(!ws||!activePane)return;if(window.cue)cue('success');ws.send(JSON.stringify({type:'respond',pane_id:activePane,text:t}));document.getElementById('quickActions').innerHTML='';setTimeout(refreshPane,500);}
-document.getElementById('termInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendText();}});
+document.getElementById('termInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); }
+});
+document.getElementById('termInput').addEventListener('input', e => {
+  resizeComposer();
+  const v = (e.target.value || '');
+  // typing lone "/" opens full command palette
+  if (v === '/') {
+    e.target.value = '';
+    resizeComposer();
+    openCommandPalette();
+  }
+});
+const _origOpenTerminal = openTerminal;
+openTerminal = function(paneId) {
+  _origOpenTerminal(paneId);
+  editingFromHistory = false;
+  resizeComposer();
+};
+const _origCloseTerminal = closeTerminal;
+closeTerminal = function() {
+  _origCloseTerminal();
+  editingFromHistory = false;
+  closeMessageHistory();
+  closeTodoSheet();
+  closeModelPicker();
+};
 document.getElementById('termContent').addEventListener('scroll', function() {
   const el = this;
   userScrolledUp = (el.scrollHeight - el.scrollTop - el.clientHeight) > 50;
   if (el.scrollTop === 0 && paneLines < 5000) loadMore();
 });
 
-if (savedUrl) setTimeout(connect, 100); else showSetup();
+window.__herdrBootReady = false; // kun: connect after profile seed
 
 // --- Command Palette ---
 const COMMANDS = {
@@ -747,14 +1031,28 @@ const COMMANDS = {
     {cmd: '/plan', desc: 'Enter plan mode', common: false},
   ],
   pi: [
-    {cmd: '/compact', desc: 'Compact context', common: true},
-    {cmd: '/new', desc: 'Start new session', common: true, danger: true},
-    {cmd: '/model', desc: 'Switch model', common: true},
-    {cmd: '/session', desc: 'Show session info', common: true},
-    {cmd: '/tree', desc: 'Jump to earlier point', common: true},
-    {cmd: '/share', desc: 'Share session as gist', common: true},
-    {cmd: '/copy', desc: 'Copy last response', common: false},
-    {cmd: '/reload', desc: 'Reload extensions and skills', common: false},
+    {cmd: '/model', desc: '选择模型（也可点「模型」）', common: true},
+    {cmd: '/new', desc: '开始新会话', common: true, danger: true},
+    {cmd: '/compact', desc: '压缩上下文', common: true},
+    {cmd: '/tree', desc: '会话树导航/跳转', common: true},
+    {cmd: '/session', desc: '会话信息与统计', common: true},
+    {cmd: '/fork', desc: '从某条用户消息分叉', common: true},
+    {cmd: '/clone', desc: '复制当前会话位置', common: true},
+    {cmd: '/resume', desc: '恢复其他会话', common: true},
+    {cmd: '/reload', desc: '重载扩展/技能/主题等', common: true},
+    {cmd: '/copy', desc: '复制上一条 Agent 消息', common: true},
+    {cmd: '/share', desc: '分享为 GitHub secret gist', common: true},
+    {cmd: '/export', desc: '导出会话 HTML/JSONL', common: true},
+    {cmd: '/import', desc: '导入 JSONL 会话', common: false},
+    {cmd: '/name', desc: '设置会话显示名', common: false},
+    {cmd: '/settings', desc: '打开设置', common: false},
+    {cmd: '/scoped-models', desc: 'Ctrl+P 循环模型范围', common: false},
+    {cmd: '/login', desc: '配置供应商认证', common: false},
+    {cmd: '/logout', desc: '移除供应商认证', common: false},
+    {cmd: '/trust', desc: '保存项目信任决定', common: false},
+    {cmd: '/hotkeys', desc: '显示快捷键', common: false},
+    {cmd: '/changelog', desc: '显示更新日志', common: false},
+    {cmd: '/quit', desc: '退出 Pi', common: false, danger: true},
   ],
   opencode: [
     {cmd: '/compact', desc: 'Compact current session', common: true},
@@ -791,23 +1089,155 @@ function closePalette() { document.getElementById('cmdPalette').style.display = 
 function filterCommands() {
   const q = (document.getElementById('cmdSearch').value || '').toLowerCase();
   const cmds = getAgentCommands();
-  const filtered = q ? cmds.filter(c => c.cmd.includes(q) || c.desc.toLowerCase().includes(q)) : cmds.filter(c => c.common);
+  let filtered = q
+    ? cmds.filter(c => c.cmd.toLowerCase().includes(q) || (c.desc || '').toLowerCase().includes(q))
+    : cmds.slice().sort((a,b) => (b.common?1:0) - (a.common?1:0)); // all, common first
   const el = document.getElementById('cmdList');
-  if (!filtered.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem">No commands match</div>'; return; }
-  el.innerHTML = filtered.map(c => `<div role="button" tabindex="0" onclick="runCommand('${c.cmd}')" onkeydown="if(event.key==='Enter')runCommand('${c.cmd}')" style="padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:2px;transition:background 0.15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''">
+  if (!filtered.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem">没有匹配命令</div>'; return; }
+  el.innerHTML = filtered.map(c => {
+    const safe = c.cmd.replace(/'/g, "\'");
+    return `<div role="button" tabindex="0" onclick="runCommand('${safe}')" onkeydown="if(event.key==='Enter')runCommand('${safe}')" style="padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:2px;transition:background 0.15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''">
     <span style="font-family:monospace;font-weight:600;font-size:0.85rem;${c.danger?'color:var(--red)':'color:var(--blue)'}">${c.cmd}</span>
-    <span style="flex:1;font-size:0.75rem;color:var(--muted)">${c.desc}</span>
-  </div>`).join('');
+    <span style="flex:1;font-size:0.75rem;color:var(--muted)">${c.desc || ''}${c.common ? '' : ''}</span>
+  </div>`;
+  }).join('');
 }
 
 function runCommand(cmd) {
   closePalette();
+  if (!cmd) return;
+  if (cmd === '/model' || cmd === '/models') {
+    openModelPicker();
+    return;
+  }
   if (!ws || !activePane) return;
   ws.send(JSON.stringify({type:'send_text', pane_id: activePane, text: cmd}));
   ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Enter']}));
   setTimeout(refreshPane, 500);
 }
 
+// --- Model picker (Pi /model) ---
+const PI_MODELS = [{"provider": "9router", "id": "deepseek-v4-flash", "ref": "9router/deepseek-v4-flash", "label": "9router/deepseek-v4-flash"}, {"provider": "9router", "id": "deepseek-v4-pro", "ref": "9router/deepseek-v4-pro", "label": "9router/deepseek-v4-pro"}, {"provider": "9router", "id": "ds/deepseek-v4-pro-max", "ref": "9router/ds/deepseek-v4-pro-max", "label": "9router/ds/deepseek-v4-pro-max"}, {"provider": "9router", "id": "gcli/grok-4.5", "ref": "9router/gcli/grok-4.5", "label": "9router/gcli/grok-4.5"}, {"provider": "9router", "id": "gpt-5.4", "ref": "9router/gpt-5.4", "label": "9router/gpt-5.4"}, {"provider": "9router", "id": "gpt-5.4-mini", "ref": "9router/gpt-5.4-mini", "label": "9router/gpt-5.4-mini"}, {"provider": "9router", "id": "gpt-5.5", "ref": "9router/gpt-5.5", "label": "9router/gpt-5.5"}, {"provider": "9router", "id": "gpt-5.6-luna", "ref": "9router/gpt-5.6-luna", "label": "9router/gpt-5.6-luna"}, {"provider": "9router", "id": "gpt-5.6-sol", "ref": "9router/gpt-5.6-sol", "label": "9router/gpt-5.6-sol"}, {"provider": "9router", "id": "gpt-5.6-terra", "ref": "9router/gpt-5.6-terra", "label": "9router/gpt-5.6-terra"}, {"provider": "9router", "id": "kimi-k2.6", "ref": "9router/kimi-k2.6", "label": "9router/kimi-k2.6"}, {"provider": "9router", "id": "kimi/kimi-for-coding", "ref": "9router/kimi/kimi-for-coding", "label": "9router/kimi/kimi-for-coding"}, {"provider": "9router", "id": "kimi/kimi-k2.7-code", "ref": "9router/kimi/kimi-k2.7-code", "label": "9router/kimi/kimi-k2.7-code"}, {"provider": "9router", "id": "kimi/kimi-k3", "ref": "9router/kimi/kimi-k3", "label": "9router/kimi/kimi-k3"}, {"provider": "9router", "id": "ocg/glm-5.2", "ref": "9router/ocg/glm-5.2", "label": "9router/ocg/glm-5.2"}, {"provider": "9router", "id": "ocg/minimax-m3", "ref": "9router/ocg/minimax-m3", "label": "9router/ocg/minimax-m3"}, {"provider": "9router", "id": "ocg/qwen3.7-max", "ref": "9router/ocg/qwen3.7-max", "label": "9router/ocg/qwen3.7-max"}, {"provider": "ds-direct", "id": "deepseek-v4-flash", "ref": "ds-direct/deepseek-v4-flash", "label": "ds-direct/deepseek-v4-flash"}, {"provider": "ds-direct", "id": "deepseek-v4-pro", "ref": "ds-direct/deepseek-v4-pro", "label": "ds-direct/deepseek-v4-pro"}, {"provider": "route", "id": "high", "ref": "route/high", "label": "route/high"}, {"provider": "route", "id": "low", "ref": "route/low", "label": "route/low"}];
+function openModelPicker() {
+  const sheet = document.getElementById('modelSheet');
+  if (!sheet) return;
+  const s = document.getElementById('modelSearch');
+  if (s) s.value = '';
+  filterModelPicker();
+  sheet.classList.add('show');
+  if (s) setTimeout(() => s.focus(), 50);
+}
+function closeModelPicker() {
+  const sheet = document.getElementById('modelSheet');
+  if (sheet) sheet.classList.remove('show');
+}
+function filterModelPicker() {
+  const q = ((document.getElementById('modelSearch') || {}).value || '').toLowerCase().trim();
+  const list = document.getElementById('modelList');
+  if (!list) return;
+  const items = PI_MODELS.filter(m => {
+    if (!q) return true;
+    return (m.ref || '').toLowerCase().includes(q)
+      || (m.id || '').toLowerCase().includes(q)
+      || (m.provider || '').toLowerCase().includes(q)
+      || (m.label || '').toLowerCase().includes(q);
+  });
+  if (!items.length) {
+    list.innerHTML = '<div class="history-empty">没有匹配模型</div>';
+    return;
+  }
+  list.innerHTML = items.map(m => {
+    const b64 = btoa(unescape(encodeURIComponent(m.ref)));
+    const sel = selectedModel && (selectedModel.ref === m.ref || selectedModel.id === m.id);
+    const border = sel ? 'border-color:var(--blue);' : '';
+    return `<button type="button" class="model-item" style="${border}" onclick="pickModel('${b64}')"><div class="id">${escHtml(m.id)}${sel ? ' · 当前' : ''}</div><div class="prov">${escHtml(m.provider)} · ${escHtml(m.ref)}</div></button>`;
+  }).join('');
+}
+function findModelByRef(ref) {
+  if (!ref) return null;
+  const r = String(ref).trim();
+  return PI_MODELS.find(m => m.ref === r || m.id === r || (`${m.provider}/${m.id}`) === r) || null;
+}
+function setSelectedModel(modelOrRef, {repaint=true} = {}) {
+  if (!modelOrRef) return;
+  if (typeof modelOrRef === 'string') {
+    const m = findModelByRef(modelOrRef) || {
+      ref: modelOrRef,
+      id: modelOrRef.includes('/') ? modelOrRef.split('/').slice(1).join('/') : modelOrRef,
+      provider: modelOrRef.includes('/') ? modelOrRef.split('/')[0] : '',
+      label: modelOrRef,
+    };
+    selectedModel = m;
+  } else {
+    selectedModel = modelOrRef;
+  }
+  if (repaint) renderFooterStatus(lastFooterLines || [], currentTodos);
+}
+function extractModelFromFooterLines(footerLines) {
+  for (const l of (footerLines || []).slice().reverse()) {
+    const t = String(l || '').trim().replace(/\s+/g, ' ');
+    if (!t) continue;
+    // Prefer full provider/id first
+    let m = t.match(/\b((?:9router|ds-direct|route)\/[A-Za-z0-9_.:\/+\-]+)\b/);
+    if (m) return m[1];
+    m = t.match(/\b((?:gcli|gpt|claude|grok|deepseek|kimi|ocg|ds)\/[A-Za-z0-9_.:\/+\-]+)\s*[•·]/);
+    if (m) return m[1];
+    m = t.match(/\b((?:gcli|gpt|claude|grok|deepseek|kimi|ocg|ds)\/[A-Za-z0-9_.:\/+\-]+)\b/);
+    if (m) return m[1];
+    m = t.match(/\b(gpt-[\w.\-]+|deepseek-[\w.\-]+|kimi-[\w.\-]+|claude-[\w.\-]+|grok-[\w.\-]+)\b/i);
+    if (m) return m[1];
+  }
+  return null;
+}
+let modelSwitchBusy = false;
+function pickModel(b64) {
+  let ref = '';
+  try { ref = decodeURIComponent(escape(atob(b64))); } catch (_) { ref = ''; }
+  closeModelPicker();
+  if (!ref || !ws || !activePane) return;
+  if (modelSwitchBusy) return;
+  modelSwitchBusy = true;
+
+  const model = findModelByRef(ref) || { ref, id: ref, provider: '', label: ref };
+  // Canonical exact form for Pi: provider/id (first slash splits provider)
+  const exact = (model.provider && model.id) ? `${model.provider}/${model.id}` : (model.ref || ref);
+  setSelectedModel({ ...model, ref: exact, label: exact }, { repaint: true });
+
+  // Close any open Pi model-selector / prompt UI first, then ONE clean command.
+  // Important: do not send multiple /model lines; Pi will treat concatenated text as one bad query.
+  try {
+    ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Escape']}));
+  } catch (_) {}
+  setTimeout(() => {
+    try {
+      ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Escape']}));
+    } catch (_) {}
+    setTimeout(() => {
+      try {
+        // Use send_text + Enter once. Keep text short and exact.
+        const cmd = '/model ' + exact;
+        ws.send(JSON.stringify({type:'send_text', pane_id: activePane, text: cmd}));
+        setTimeout(() => {
+          try {
+            ws.send(JSON.stringify({type:'send_keys', pane_id: activePane, keys:['Enter']}));
+          } catch (_) {}
+          // poll footer until model chip catches up
+          let n = 0;
+          const poll = setInterval(() => {
+            n++;
+            refreshPane();
+            if (n >= 6) {
+              clearInterval(poll);
+              modelSwitchBusy = false;
+            }
+          }, 700);
+        }, 80);
+      } catch (_) {
+        modelSwitchBusy = false;
+      }
+    }, 100);
+  }, 80);
+}
 // --- Web Push ---
 let pushSubscription = null;
 
@@ -883,6 +1313,563 @@ function urlBase64ToUint8Array(base64String) {
   for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
   return arr;
 }
+
+
+// --- kun: profiles + thin filter ---
+const DEFAULT_PROFILES = {
+  pro: { id:'pro', label:'Pro', host:'macbook-pro.example.com', token:'' },
+  air: { id:'air', label:'Air', host:'macbook-air.example.com', token:'' },
+};
+let profiles = loadProfiles();
+let activeProfileId = localStorage.getItem('herdr_active_profile') || guessProfileFromLocation() || 'pro';
+let thinFilterOn = localStorage.getItem('herdr_thin_filter') !== '0';
+let lastPaneRaw = '';
+let offlineMode = false;
+
+function loadProfiles() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('herdr_profiles') || 'null');
+    if (raw && raw.pro && raw.air) return raw;
+  } catch (_) {}
+  return JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+}
+function saveProfilesToStore() {
+  localStorage.setItem('herdr_profiles', JSON.stringify(profiles));
+}
+function guessProfileFromLocation() {
+  const h = (location.hostname || '').toLowerCase();
+  if (h.includes('macbook-air')) return 'air';
+  if (h.includes('macbook-pro')) return 'pro';
+  return null;
+}
+function activeProfile() { return profiles[activeProfileId] || profiles.pro; }
+function profileWsUrl(p) {
+  if (!p || !p.host) return '';
+  const host = p.host.replace(/^https?:\/\//,'').replace(/^wss?:\/\//,'').replace(/\/$/,'');
+  return 'wss://' + host;
+}
+function applyActiveProfileToStorage() {
+  const p = activeProfile();
+  const url = profileWsUrl(p);
+  if (url) localStorage.setItem('herdr_relay_url', url);
+  if (p.token) localStorage.setItem('herdr_relay_token', p.token);
+  else localStorage.removeItem('herdr_relay_token');
+  const ru = document.getElementById('relayUrl');
+  const rt = document.getElementById('relayToken');
+  if (ru) ru.value = url;
+  if (rt) rt.value = p.token || '';
+}
+function renderProfileBar() {
+  const bar = document.getElementById('profileBar');
+  if (!bar) return;
+  const ids = ['pro','air'];
+  bar.innerHTML = ids.map(id => {
+    const p = profiles[id];
+    const active = id === activeProfileId;
+    const offline = active && offlineMode;
+    const cls = 'profile-chip' + (active ? ' active' : '') + (offline ? ' offline' : '');
+    const mark = offline ? ' · 离线' : '';
+    return `<button class="${cls}" onclick="switchProfile('${id}')">${p.label}${mark}</button>`;
+  }).join('');
+  const pl = document.getElementById('profileLabel');
+  if (pl) pl.textContent = '· ' + (activeProfile().label || '');
+}
+function fillProfileSettings() {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('proHost', profiles.pro.host);
+  set('proToken', profiles.pro.token);
+  set('airHost', profiles.air.host);
+  set('airToken', profiles.air.token);
+}
+function saveProfiles() {
+  const val = id => (document.getElementById(id)?.value || '').trim();
+  profiles.pro.host = val('proHost') || DEFAULT_PROFILES.pro.host;
+  profiles.pro.token = val('proToken');
+  profiles.air.host = val('airHost') || DEFAULT_PROFILES.air.host;
+  profiles.air.token = val('airToken');
+  saveProfilesToStore();
+  applyActiveProfileToStorage();
+  renderProfileBar();
+  connect();
+  const st = document.getElementById('settingsStatus');
+  if (st) st.innerHTML = '<span style="color:var(--green)">Machines saved</span>';
+}
+function switchProfile(id) {
+  if (!profiles[id]) return;
+  if (id === activeProfileId && !offlineMode && ws && ws.readyState === 1) return;
+  activeProfileId = id;
+  localStorage.setItem('herdr_active_profile', id);
+  offlineMode = false;
+  agents = [];
+  activeWorkspace = null;
+  activeTab = null;
+  if (activePane) closeTerminal();
+  // ensure both host+token written before connect
+  applyActiveProfileToStorage();
+  // also stamp token into URL storage even if empty host recovery
+  const p = activeProfile();
+  if (p.token) localStorage.setItem('herdr_relay_token', p.token);
+  if (p.host) localStorage.setItem('herdr_relay_url', profileWsUrl(p));
+  renderProfileBar();
+  const list = document.getElementById('agents');
+  if (list) list.innerHTML = `<div class="empty">正在连接 ${p.label}…</div>`;
+  renderProfileBar();
+  connect();
+}
+function showOffline(profile) {
+  if (ws && ws.readyState === 1) return; // already live
+  if (ws && ws.readyState === 0) return; // still connecting
+  offlineMode = true;
+  agents = [];
+  const el = document.getElementById('agents');
+  if (el) {
+    el.innerHTML = `<div class="offline-banner">
+      <div style="font-size:1.1rem;margin-bottom:6px">${profile.label} 离线</div>
+      <div>${profile.host || ''} 现在连不上</div>
+      <div style="margin-top:10px;font-size:0.8rem">电脑开着且 herdr-remote 在跑时再试。可点顶部切换另一台。</div>
+      <button onclick="connect()" style="margin-top:12px;padding:8px 14px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-weight:600">重试</button>
+    </div>`;
+  }
+  renderProfileBar();
+}
+
+function toggleThinFilter(on) {
+  thinFilterOn = !!on;
+  localStorage.setItem('herdr_thin_filter', thinFilterOn ? '1' : '0');
+  const el = document.getElementById('termContent');
+  if (el && lastPaneRaw) renderPaneContent(el, lastPaneRaw);
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function isTodoHeader(line) {
+  return /^\s*Tasks?\s+\d+\s*\/\s*\d+/i.test(line) || /^\s*TODO\s+\d+\s*\/\s*\d+/i.test(line);
+}
+function isTodoItemLine(line) {
+  const t = line.trim();
+  if (!t) return false;
+  if (/[◉○✓✗☐☑]/.test(t) && (/\d+\./.test(t) || /[│├└]/.test(t))) return true;
+  if (/^[◉○✓✗☐☑]\s+/.test(t)) return true;
+  if (/^[│├└]/.test(t) && t.length > 2) return true;
+  return false;
+}
+function extractTodoBlock(lines) {
+  let start = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (isTodoHeader(lines[i])) start = i;
+  }
+  if (start < 0) return null;
+  const block = [lines[start]];
+  let i = start + 1;
+  while (i < lines.length) {
+    const l = lines[i];
+    const t = l.trim();
+    if (!t) {
+      if (i + 1 < lines.length && (isTodoItemLine(lines[i + 1]) || isTodoHeader(lines[i + 1]))) { i++; continue; }
+      break;
+    }
+    if (typeof isFooterLine === 'function' && isFooterLine(l)) break;
+    if (typeof isUserBoxStart === 'function' && isUserBoxStart(l)) break;
+    if (typeof isRuleLine === 'function' && isRuleLine(l) && block.length > 1) break;
+    if (isTodoItemLine(l) || isTodoHeader(l) || /^[│├└]/.test(t) || (/[━─]{4,}/.test(t) && t.length < 80)) {
+      block.push(l); i++; continue;
+    }
+    break;
+  }
+  const header = block[0].trim();
+  const m = header.match(/(\d+)\s*\/\s*(\d+)/);
+  return {
+    start,
+    end: start + block.length,
+    summary: header.replace(/\s+[━─]+.*$/, '').trim(),
+    lines: block,
+    done: m ? parseInt(m[1], 10) : null,
+    total: m ? parseInt(m[2], 10) : null,
+  };
+}
+function openTodoSheet() {
+  if (!currentTodos || !currentTodos.lines || !currentTodos.lines.length) return;
+  const sheet = document.getElementById('todoSheet');
+  const title = document.getElementById('todoTitle');
+  const sum = document.getElementById('todoSummary');
+  const body = document.getElementById('todoBody');
+  if (!sheet || !body) return;
+  if (title) title.textContent = currentTodos.summary || 'TODO';
+  if (sum) {
+    sum.textContent = (currentTodos.done != null && currentTodos.total != null)
+      ? ('进度 ' + currentTodos.done + '/' + currentTodos.total)
+      : '';
+  }
+  body.innerHTML = currentTodos.lines.map(l => {
+    const t = l.replace(/\s+$/,'');
+    let cls = 'todo-item';
+    if (/✓/.test(t)) cls += ' done';
+    else if (/◉/.test(t)) cls += ' active';
+    else if (/○/.test(t)) cls += ' open';
+    return '<div class="' + cls + '">' + escHtml(t) + '</div>';
+  }).join('');
+  sheet.classList.add('show');
+}
+function closeTodoSheet() {
+  const sheet = document.getElementById('todoSheet');
+  if (sheet) sheet.classList.remove('show');
+}
+
+function isRuleLine(line) {
+  const t = line.trim();
+  if (!t) return true;
+  if (/^[\s─━═_—│|┌┐└┘├┤┬┴┼┄┅┈┉╌╍═╠╣╦╩╬▀▄█░▒▓\-]+$/.test(t)) return true;
+  if (/^[-=_~]{4,}$/.test(t)) return true;
+  if (/^[\u2500-\u257F\s]{4,}$/.test(t)) return true;
+  if (/^[╭╰].*[╮╯]?$/.test(t) && !/user/i.test(t)) return true;
+  return false;
+}
+function isUserBoxStart(line) {
+  return /╭\s*user\b/i.test(line) || (/╭/.test(line) && /\buser\b/i.test(line));
+}
+function isFooterLine(line) {
+  const t = line.trim();
+  if (!t) return false;
+  // path + branch: ~/.agents/... (main) or /Volumes/... (feat/x)
+  if (/^[~\/].+\s+\([^)]+\)\s*$/.test(t) && !/\s{2,}/.test(t.replace(/\s+\([^)]+\)\s*$/,''))) return true;
+  // token / context bar: ↑1.2M ↓95k ... 59.4%/400k ... gcli/grok-4.5
+  if (/[↑↓]/.test(t) && (/%\//.test(t) || /\/\d+k\b/i.test(t) || /\bCH\d/.test(t))) return true;
+  if (/\(\d+router\)|\bgcli\/|\bcodex\/|\bclaude\b.*•|\b•\s*(max|high|medium|low)\b/i.test(t)) return true;
+  if (/Chrome Bridge|system-awake|pruner:|multimodal-proxy/i.test(t)) return true;
+  // bare model lines sometimes
+  if (/^\S+\/[\w.+\-]+(?:\s+[•·]\s+\w+)?\s*$/.test(t) && /(gcli|gpt|claude|grok|deepseek|gemini|router)/i.test(t)) return true;
+  return false;
+}
+function isNoiseLine(line) {
+  const t = line.trim();
+  if (!t) return true;
+  if (isRuleLine(line)) return true;
+  if (isFooterLine(line)) return true; // handled separately, never as chat
+  if (isTodoHeader(line) || isTodoItemLine(line)) return true; // extracted to TODO sheet
+  if (/^Thinking:/i.test(t)) return true;
+  if (/^Warning:|^Error:|^WARN\b|^ERROR\b|^INFO\b|^DEBUG\b/i.test(t)) return true;
+  if (/not found in registry|Falling back|Released pi-|Chrome Bridge|multimodal-proxy|pruner:|system-awake/i.test(t)) return true;
+  if (/bypass permissions|esc to (interrupt|cancel)|ctrl\+c to|type to queue/i.test(t)) return true;
+  if (/^\(9router\)|^\d+(\.\d+)?%\/\d+k|ctx ─+|Working\.\.\.|Baking…|Baking\.\.\./i.test(t)) return true;
+  if (/^\.\.\. \(\d+ more lines/.test(t)) return true;
+  if (/^[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/.test(t)) return true;
+  return false;
+}
+function isCommandOrCode(line) {
+  const t = line.trim();
+  if (!t) return false;
+  if (isFooterLine(line)) return false;
+  if (/^(import|package|public |private |protected |class |function |const |let |var |return |from |export |try \{|catch |throw |if \(|for \(|while \()/.test(t)) return true;
+  if (/[{};]$/.test(t) && t.length < 140) return true;
+  if (/^\$\s/.test(t)) return true;
+  if (/docker\s|redis-cli|curl\s|kubectl\s|git\s|npm\s|pnpm\s|yarn\s|python3?\s|node\s|cargo\s|go\s|bun\s|uv\s|brew\s|herdr\s|scp\s|ssh\s/.test(t)) return true;
+  if (/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/.test(t)) return true;
+  if (/\/Users\/|\/Volumes\/|\/tmp\/|src\/main\/java\/|~\/\.agents\//.test(t) && t.length > 40) return true;
+  if (/^[A-Za-z0-9+/=_-]{80,}$/.test(t)) return true;
+  if (/timeout \d+s\)|claims=\{|memberId=|type=class |Authorization:|Bearer |pane_id|terminal_id/.test(t)) return true;
+  if (/^cat\s|^echo\s|^cd\s|^ls\s|^mkdir\s|^chmod\s|^export\s|^rg\s|^scp\s|^awk\s|^sed\s/.test(t)) return true;
+  if (/^```/.test(t)) return true;
+  if (/^\{"id":/.test(t) || /"type":"agent_list"/.test(t)) return true;
+  if (/^#\s/.test(t) && t.length < 120) return true;
+  return false;
+}
+function isAnswerLine(line) {
+  const t = line.trim();
+  if (!t) return false;
+  if (isUserBoxStart(line) || t.startsWith('│') || t.startsWith('╰') || t.startsWith('╭')) return false;
+  if (isFooterLine(line) || isNoiseLine(line) || isCommandOrCode(line)) return false;
+  if (/[\u4e00-\u9fff]/.test(t)) return true;
+  if (/^(#{1,3}\s|[-*•]\s|>\s|\d+\.\s)/.test(t) && t.length < 260) return true;
+  if (/^(✓|✔|●|○|✅|❌)?\s*(Done|Next|Plan|Summary|Result|Note|已|请你)\b/i.test(t)) return true;
+  if (t.length <= 240 && /[A-Za-z]{3,}/.test(t) && !/[;{}()=<>]{2,}/.test(t) && !/\.(js|ts|py|java|go|rs|json|toml|yml)\b/.test(t)) {
+    if (!t.includes('/') || t.split(/\s+/).length >= 4) return true;
+  }
+  return false;
+}
+function stripBoxLine(line) {
+  let t = line.replace(/^\s*│\s?/, '');
+  t = t.replace(/\s*│\s*$/, '');
+  return t.replace(/\s+$/,'');
+}
+function foldPreview(block) {
+  const first = (block.find(l => l.trim()) || '').trim().replace(/^\$\s*/, '');
+  return (first.slice(0, 64) || '…');
+}
+function classifyFooterLine(line) {
+  const t = line.trim().replace(/\s+/g, ' ');
+  if (/[↑↓]/.test(t) && (/%\//.test(t) || /\/\d+k\b/i.test(t) || /\bCH\d/.test(t))) return 'ctx';
+  if (/\(\d+router\)|\bgcli\/|\bcodex\/|•\s*(max|high|medium|low)\b/i.test(t)) return 'model';
+  if (/Chrome Bridge|system-awake|pruner:|multimodal-proxy/i.test(t)) return 'bridge';
+  if (/^[~\/].+\([^)]+\)\s*$/.test(t)) return 'path';
+  if (/(gcli|gpt|claude|grok|deepseek|gemini|router)\//i.test(t)) return 'model';
+  return 'meta';
+}
+function renderFooterStatus(footerLines, todos) {
+  const el = document.getElementById('termStatus');
+  if (!el) return;
+  lastFooterLines = footerLines || [];
+  // Sync selectedModel from live footer when possible
+  const parsed = extractModelFromFooterLines(lastFooterLines);
+  if (parsed) {
+    // Keep optimistic selection if same family; otherwise follow pane truth
+    const parsedModel = findModelByRef(parsed) || { ref: parsed, id: parsed, provider: '', label: parsed };
+    if (!selectedModel || !selectedModel.id || selectedModel.id === parsedModel.id || selectedModel.ref === parsed || (selectedModel.id && parsed.includes(selectedModel.id))) {
+      selectedModel = Object.assign({}, selectedModel || {}, parsedModel);
+    } else {
+      // Pane truth wins after refresh
+      selectedModel = parsedModel;
+    }
+  }
+  const cleaned = [];
+  for (const l of footerLines || []) {
+    const t = l.trim().replace(/\s+/g, ' ');
+    if (!t || isRuleLine(l) || isTodoHeader(l) || isTodoItemLine(l)) continue;
+    if (!cleaned.includes(t)) cleaned.push(t);
+  }
+  const keep = cleaned.slice(-6);
+  const chips = [];
+  // Model chip first (always visible when known)
+  if (selectedModel && (selectedModel.id || selectedModel.ref || selectedModel.label)) {
+    const mid = selectedModel.id || selectedModel.ref || selectedModel.label;
+    const tip = selectedModel.ref || selectedModel.label || mid;
+    chips.push(`<button type="button" class="chip model" onclick="openModelPicker()" title="${escHtml(tip)}">${escHtml(mid)}</button>`);
+  }
+  if (todos && todos.summary) {
+    const label = (todos.done != null && todos.total != null) ? (`TODO ${todos.done}/${todos.total}`) : 'TODO';
+    chips.push(`<button type="button" class="chip todo" onclick="openTodoSheet()" title="${escHtml(todos.summary)}">${escHtml(label)}</button>`);
+  } else if (activePane) {
+    const a = agents.find(x => x.pane_id === activePane);
+    if (a && a.tokens && (a.tokens.task || a.tokens.task_count)) {
+      const label = a.tokens.task_count ? `TODO ${a.tokens.task_count}` : 'TODO';
+      const tip = String(a.tokens.task || '');
+      chips.push(`<button type="button" class="chip todo" onclick="openTodoSheet()" title="${escHtml(tip)}">${escHtml(label)}</button>`);
+      if (!currentTodos) {
+        currentTodos = { summary: tip || 'TODO', lines: [tip + (a.tokens.task_count ? ` (${a.tokens.task_count})` : '')], done: null, total: null };
+      }
+    }
+  }
+  for (const t of keep) {
+    const kind = classifyFooterLine(t);
+    // Skip pure model lines if already shown as model chip
+    if (kind === 'model' && selectedModel) continue;
+    let label = t;
+    if (kind === 'path') {
+      label = t.replace(/^.*?([^\/\s]+\/[^\/\s]+)\s+(\([^)]+\))\s*$/, '$1 $2');
+      if (label === t) label = t.replace(/^.*\//, '…/');
+    }
+    if (kind === 'ctx') {
+      const m = t.match(/(\d+(?:\.\d+)?%\s*\/\s*\d+k)/i);
+      const parts = [];
+      const up = t.match(/↑[^\s]+/);
+      const down = t.match(/↓[^\s]+/);
+      if (up) parts.push(up[0]);
+      if (down) parts.push(down[0]);
+      if (m) parts.push(m[1].replace(/\s+/g,''));
+      // strip trailing model from ctx chip; model has its own chip
+      label = parts.join(' ');
+      if (!label) {
+        // fallback compact without model tail
+        label = t.replace(/\b(?:gcli|gpt|claude|grok|deepseek|kimi|ocg|ds|9router)\/[A-Za-z0-9_.:\/+\-]+(?:\s*[•·]\s*\w+)?/g, '').trim();
+        label = label.replace(/\s{2,}/g, ' ').slice(0, 60);
+      }
+    }
+    if (kind === 'bridge') {
+      if (/Chrome Bridge/i.test(t)) label = 'Chrome Bridge';
+      else if (/system-awake/i.test(t)) label = 'system-awake';
+      else label = t.slice(0, 40);
+    }
+    if (kind === 'model' && !selectedModel) {
+      // promote to selected
+      const mid = extractModelFromFooterLines([t]);
+      if (mid) setSelectedModel(mid, { repaint: false });
+      const show = (selectedModel && (selectedModel.id || selectedModel.ref)) || t;
+      chips.unshift(`<button type="button" class="chip model" onclick="openModelPicker()" title="${escHtml(t)}">${escHtml(typeof show === 'string' ? show : (show.id || show.ref))}</button>`);
+      continue;
+    }
+    chips.push(`<span class="chip ${kind}" title="${escHtml(t)}">${escHtml(label)}</span>`);
+  }
+  if (!chips.length) { el.classList.remove('show'); el.innerHTML = ''; return; }
+  el.classList.add('show');
+  el.innerHTML = chips.join('');
+}
+function renderPaneContent(el, raw) {
+  lastPaneRaw = raw || '';
+  const toggle = document.getElementById('thinFilterToggle');
+  if (toggle) toggle.checked = thinFilterOn;
+  if (!thinFilterOn) {
+    el.textContent = lastPaneRaw || '(empty)';
+    const st = document.getElementById('termStatus');
+    if (st) { st.classList.remove('show'); st.innerHTML = ''; }
+    return;
+  }
+  const lines = (lastPaneRaw || '').split('\n');
+  // vertical Tasks/TODO tree: hide from chat, expose via bottom TODO chip
+  const todo = extractTodoBlock(lines);
+  currentTodos = todo ? { summary: todo.summary, lines: todo.lines, done: todo.done, total: todo.total } : null;
+  let workLines = lines;
+  if (todo) workLines = lines.slice(0, todo.start).concat(lines.slice(todo.end));
+  // collect footer from the bottom (status bar lives there)
+  const footer = [];
+  let end = workLines.length;
+  // scan last ~12 non-empty-ish lines for footer cluster
+  for (let k = workLines.length - 1; k >= 0 && footer.length < 8; k--) {
+    const t = workLines[k].trim();
+    if (!t) continue;
+    if (isFooterLine(workLines[k]) || isRuleLine(workLines[k])) {
+      footer.unshift(workLines[k]);
+      end = k;
+      continue;
+    }
+    // stop at first real chat/content from bottom once we already have footer
+    if (footer.length) break;
+    // if bottom is not footer, don't force
+    break;
+  }
+  // if we only grabbed rules, clear
+  if (footer.every(l => isRuleLine(l) || !l.trim())) {
+    footer.length = 0;
+    end = lines.length;
+  }
+  renderFooterStatus(footer, currentTodos);
+
+  const bodyLines = workLines.slice(0, end);
+  const segs = [];
+  let hidden = 0;
+  let i = 0;
+  while (i < bodyLines.length) {
+    const line = bodyLines[i];
+    if (isUserBoxStart(line)) {
+      const block = [];
+      i++;
+      while (i < bodyLines.length) {
+        const n = bodyLines[i];
+        if (/^\s*╰/.test(n)) { i++; break; }
+        if (/^\s*│/.test(n) || n.includes('│')) {
+          const content = stripBoxLine(n);
+          if (content.trim()) block.push(content);
+          i++; continue;
+        }
+        break;
+      }
+      const text = block.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+      if (text) segs.push({ type: 'user', text });
+      else hidden++;
+      continue;
+    }
+    if (isFooterLine(line) || isTodoHeader(line) || isTodoItemLine(line) || isNoiseLine(line) || isRuleLine(line)) { hidden++; i++; continue; }
+    if (isCommandOrCode(line)) {
+      const block = [line];
+      let j = i + 1;
+      while (j < bodyLines.length && (isCommandOrCode(bodyLines[j]) || bodyLines[j].trim() === '' || isRuleLine(bodyLines[j]))) {
+        if (isUserBoxStart(bodyLines[j])) break;
+        block.push(bodyLines[j]);
+        j++;
+        if (block.length > 120) break;
+      }
+      while (block.length && block[block.length - 1].trim() === '') block.pop();
+      if (block.length) segs.push({ type: 'cmd', lines: block });
+      i = j; continue;
+    }
+    if (isAnswerLine(line)) {
+      const block = [line];
+      let j = i + 1;
+      while (j < bodyLines.length) {
+        const n = bodyLines[j];
+        if (isUserBoxStart(n) || isCommandOrCode(n) || isFooterLine(n)) break;
+        if (isAnswerLine(n) || (n.trim() === '' && j + 1 < bodyLines.length && isAnswerLine(bodyLines[j + 1]))) {
+          block.push(n); j++; continue;
+        }
+        break;
+      }
+      const text = block.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+      if (text) segs.push({ type: 'agent', text });
+      i = j; continue;
+    }
+    hidden++; i++;
+  }
+
+  // sync user message history from parsed pane (order: oldest → newest)
+  const users = segs.filter(s => s.type === 'user').map(s => s.text).filter(Boolean);
+  if (users.length) userMessageHistory = users.slice(-50);
+
+  if (!segs.length) {
+    el.innerHTML = `<div class="term-line-noise">暂无对话文字（已隐藏 ${hidden} 行噪音）。关掉「只看回答」可看原文。</div>`;
+    return;
+  }
+
+  const merged = [];
+  for (const s of segs) {
+    if (merged.length && merged[merged.length - 1].type === 'agent' && s.type === 'agent') {
+      merged[merged.length - 1].text += '\n\n' + s.text;
+    } else if (merged.length && merged[merged.length - 1].type === 'cmd' && s.type === 'cmd') {
+      merged[merged.length - 1].lines = merged[merged.length - 1].lines.concat(s.lines);
+    } else {
+      merged.push(s.type === 'cmd' ? { type: 'cmd', lines: s.lines.slice() } : { ...s });
+    }
+  }
+
+  let html = merged.map(s => {
+    if (s.type === 'user') {
+      return `<div class="term-user"><span class="term-role">你</span>${escHtml(s.text)}</div>`;
+    }
+    if (s.type === 'agent') {
+      return `<div class="term-answer"><span class="term-role">Agent</span>${escHtml(s.text)}</div>`;
+    }
+    const body = escHtml(s.lines.join('\n'));
+    const n = s.lines.length;
+    const preview = escHtml(foldPreview(s.lines));
+    return `<details class="term-fold term-fold-cmd"><summary>命令/代码 ${n} 行 · ${preview}</summary><pre>${body}</pre></details>`;
+  }).join('');
+  if (hidden > 0) html += `<div class="term-meta">已隐藏 ${hidden} 行警告/状态/框线</div>`;
+  el.innerHTML = html;
+}
+
+// seed profiles from URL token + host on first load
+(function seedProfiles() {
+  const host = location.hostname || '';
+  const tok = localStorage.getItem('herdr_relay_token') || new URLSearchParams(location.search).get('token') || '';
+  if (host.includes('macbook-pro')) {
+    profiles.pro.host = host;
+    if (tok) profiles.pro.token = tok;
+    activeProfileId = 'pro';
+  } else if (host.includes('macbook-air')) {
+    profiles.air.host = host;
+    if (tok) profiles.air.token = tok;
+    activeProfileId = 'air';
+  } else if (tok && !profiles.pro.token) {
+    // unknown host: keep as pro token seed if empty
+    profiles.pro.token = profiles.pro.token || tok;
+  }
+  // preserve previously saved tokens if present
+  try {
+    const saved = JSON.parse(localStorage.getItem('herdr_profiles') || 'null');
+    if (saved) {
+      if (saved.pro?.token) profiles.pro.token = saved.pro.token;
+      if (saved.air?.token) profiles.air.token = saved.air.token;
+      if (saved.pro?.host) profiles.pro.host = saved.pro.host;
+      if (saved.air?.host) profiles.air.host = saved.air.host;
+    }
+  } catch(_){}
+  // fill missing tokens/hosts from defaults (cross-machine switch needs both)
+  if (!profiles.pro.token) profiles.pro.token = DEFAULT_PROFILES.pro.token;
+  if (!profiles.air.token) profiles.air.token = DEFAULT_PROFILES.air.token;
+  if (!profiles.pro.host) profiles.pro.host = DEFAULT_PROFILES.pro.host;
+  if (!profiles.air.host) profiles.air.host = DEFAULT_PROFILES.air.host;
+  // if current host matches one profile, prefer its token from URL
+  if (host.includes('macbook-pro') && tok) profiles.pro.token = tok;
+  if (host.includes('macbook-air') && tok) profiles.air.token = tok;
+  saveProfilesToStore();
+  localStorage.setItem('herdr_active_profile', activeProfileId);
+  applyActiveProfileToStorage();
+  fillProfileSettings();
+  renderProfileBar();
+  const tgl = document.getElementById('thinFilterToggle');
+  if (tgl) tgl.checked = thinFilterOn;
+  window.__herdrBootReady = true;
+  if (profileWsUrl(activeProfile())) setTimeout(connect, 50); else showSetup();
+})();
+
 
 initPush();
 </script>

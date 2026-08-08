@@ -173,27 +173,52 @@ def run_herdr(*args, remote=None):
         return ""
 
 
+def get_tab_labels(remote=None):
+    """Map tab_id -> user-facing tab label from herdr tab list."""
+    raw = run_herdr("tab", "list", remote=remote)
+    labels = {}
+    try:
+        data = json.loads(raw)
+        for t in data.get("result", {}).get("tabs", []):
+            tid = t.get("tab_id")
+            if not tid:
+                continue
+            label = (t.get("label") or "").strip()
+            if label:
+                labels[tid] = label
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return {}
+    return labels
+
 def get_agents_from_host(remote=None):
     raw = run_herdr("pane", "list", remote=remote)
     host_label = remote or "local"
+    tab_labels = get_tab_labels(remote=remote)
     try:
         data = json.loads(raw)
         panes = data.get("result", {}).get("panes", [])
-        return [
-            {
+        agents = []
+        for p in panes:
+            if not p.get("agent"):
+                continue
+            tab_id = p.get("tab_id", "") or ""
+            tab_label = tab_labels.get(tab_id, "")
+            # Prefer explicit pane label, else tab name, else empty (UI falls back to project)
+            pane_label = (p.get("label") or "").strip()
+            agents.append({
                 "pane_id": p["pane_id"],
                 "agent": p.get("agent", ""),
-                "label": p.get("label", ""),
+                "label": pane_label or tab_label,
+                "tab_label": tab_label,
                 "status": p.get("agent_status", "unknown"),
                 "cwd": p.get("cwd", ""),
                 "project": os.path.basename(p.get("cwd", "")),
                 "host": host_label,
                 "remote": remote,
                 "workspace_id": p.get("workspace_id", ""),
-                "tab_id": p.get("tab_id", ""),
-            }
-            for p in panes if p.get("agent")
-        ]
+                "tab_id": tab_id,
+            })
+        return agents
     except (json.JSONDecodeError, KeyError):
         return []
 
