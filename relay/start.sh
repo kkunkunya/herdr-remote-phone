@@ -2,7 +2,9 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_FILE="$HOME/.config/herdr-remote/config.env"
+CONFIG_DIR="$HOME/.config/herdr-remote"
+CONFIG_FILE="$CONFIG_DIR/config.env"
+SECRETS_FILE="$CONFIG_DIR/secrets.env"
 WS_PORT="${HERDR_RELAY_PORT:-8375}"
 
 RELAY_PID=""
@@ -22,12 +24,25 @@ trap cleanup INT TERM EXIT
 echo "herdr-remote relay"
 echo ""
 
-# Load config if available
-[ -f "$CONFIG_FILE" ] && source "$CONFIG_FILE"
+# Load config if available (allexport so child relay sees every var)
+if [ -f "$CONFIG_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$CONFIG_FILE"
+  if [ -f "$SECRETS_FILE" ]; then
+    # shellcheck disable=SC1090
+    source "$SECRETS_FILE"
+  fi
+  set +a
+fi
+WS_PORT="${HERDR_RELAY_PORT:-$WS_PORT}"
+UV="${HERDR_UV_PATH:-$(command -v uv || true)}"
+CLOUDFLARED="${HERDR_CLOUDFLARED_PATH:-$(command -v cloudflared || true)}"
+[ -n "$UV" ] || { echo "Error: uv not found." >&2; exit 1; }
 
 # 1. Start relay
 echo "Starting relay on :$WS_PORT..."
-uv run "$SCRIPT_DIR/herdr_relay.py" &
+"$UV" run "$SCRIPT_DIR/herdr_relay.py" &
 RELAY_PID=$!
 sleep 2
 
@@ -40,14 +55,14 @@ fi
 echo "Relay running (pid $RELAY_PID)"
 
 # 2. Start tunnel (if cloudflared available)
-if command -v cloudflared >/dev/null 2>&1; then
+if [ -n "$CLOUDFLARED" ]; then
     TUNNEL_MODE="${HERDR_TUNNEL_MODE:-temp}"
 
     if [ "$TUNNEL_MODE" = "named" ] && [ -n "$HERDR_TUNNEL_NAME" ]; then
         echo "Starting named tunnel ($HERDR_TUNNEL_NAME)..."
         CF_CONFIG="$HOME/.cloudflared/config-herdr.yml"
         if [ -f "$CF_CONFIG" ]; then
-            cloudflared tunnel --config "$CF_CONFIG" run "$HERDR_TUNNEL_NAME" &
+            "$CLOUDFLARED" tunnel --protocol "${HERDR_TUNNEL_PROTOCOL:-http2}" --config "$CF_CONFIG" run "$HERDR_TUNNEL_NAME" &
             TUNNEL_PID=$!
         else
             echo "Warning: Tunnel config not found at $CF_CONFIG"
@@ -59,7 +74,7 @@ if command -v cloudflared >/dev/null 2>&1; then
 
     if [ "$TUNNEL_MODE" = "temp" ]; then
         echo "Starting temp tunnel..."
-        cloudflared tunnel --url "http://localhost:$WS_PORT" 2>&1 &
+        "$CLOUDFLARED" tunnel --protocol "${HERDR_TUNNEL_PROTOCOL:-http2}" --url "http://127.0.0.1:$WS_PORT" 2>&1 &
         TUNNEL_PID=$!
         sleep 4
 

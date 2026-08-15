@@ -190,17 +190,40 @@ def get_tab_labels(remote=None):
         return {}
     return labels
 
+def get_workspace_labels(remote=None):
+    """Map workspace_id -> (label, agent_status) from herdr workspace list."""
+    raw = run_herdr("workspace", "list", remote=remote)
+    labels = {}
+    try:
+        data = json.loads(raw)
+        for w in data.get("result", {}).get("workspaces", []):
+            wid = w.get("workspace_id")
+            if not wid:
+                continue
+            label = (w.get("label") or "").strip()
+            labels[wid] = {
+                "label": label,
+                "status": w.get("agent_status") or "unknown",
+            }
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return {}
+    return labels
+
 def get_agents_from_host(remote=None):
     raw = run_herdr("pane", "list", remote=remote)
     host_label = remote or "local"
     tab_labels = get_tab_labels(remote=remote)
+    ws_info = get_workspace_labels(remote=remote)
     try:
         data = json.loads(raw)
         panes = data.get("result", {}).get("panes", [])
         agents = []
+        agent_ws = set()
         for p in panes:
+            ws_id = p.get("workspace_id", "") or ""
             if not p.get("agent"):
                 continue
+            agent_ws.add(ws_id)
             tab_id = p.get("tab_id", "") or ""
             tab_label = tab_labels.get(tab_id, "")
             # Prefer explicit pane label, else tab name, else empty (UI falls back to project)
@@ -215,7 +238,37 @@ def get_agents_from_host(remote=None):
                 "project": os.path.basename(p.get("cwd", "")),
                 "host": host_label,
                 "remote": remote,
-                "workspace_id": p.get("workspace_id", ""),
+                "workspace_id": ws_id,
+                "workspace_label": ws_info.get(ws_id, {}).get("label", ""),
+                "tab_id": tab_id,
+            })
+        # One placeholder entry per agent-less tab so empty/new tabs show
+        # up on the phone (mirroring herdr) and can be opened to type
+        # commands. Workspaces where every tab has an agent are unaffected.
+        seen_tabs = set()
+        for p in panes:
+            if p.get("agent"):
+                continue
+            tab_id = p.get("tab_id", "") or ""
+            if tab_id in seen_tabs:
+                continue
+            seen_tabs.add(tab_id)
+            ws_id = p.get("workspace_id", "") or ""
+            ws = ws_info.get(ws_id, {})
+            wl = ws.get("label", "")
+            tl = tab_labels.get(tab_id, "")
+            agents.append({
+                "pane_id": p["pane_id"],
+                "agent": "",
+                "label": tl or wl,
+                "tab_label": tl,
+                "status": p.get("agent_status", "unknown"),
+                "cwd": p.get("cwd", ""),
+                "project": wl or os.path.basename(p.get("cwd", "")),
+                "host": host_label,
+                "remote": remote,
+                "workspace_id": ws_id,
+                "workspace_label": wl,
                 "tab_id": tab_id,
             })
         return agents
@@ -243,6 +296,187 @@ def detect_options(text):
     if "approve all pending" in lower:
         return SUBAGENT_OPTIONS
     return None
+
+
+INBOX_PATH = os.path.expanduser("~/.local/state/herdr-remote/inbox.json")
+INBOX_MAX = 200
+
+
+def _load_inbox():
+    try:
+        with open(INBOX_PATH) as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(data, list):
+        return []
+    return [
+        item for item in data
+        if isinstance(item, dict) and re.fullmatch(r"in\d+", str(item.get("id", "")))
+    ]
+
+
+def _save_inbox(inbox):
+    path = os.path.abspath(INBOX_PATH)
+    tmp = f"{path}.tmp-{os.getpid()}"
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(tmp, "w") as f:
+            json.dump(inbox, f, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except OSError:
+        log.exception("Failed to persist inbox")
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+
+
+INBOX = _load_inbox()
+_INBOX_SEQ = max((int(item["id"][2:]) for item in INBOX), default=0)
+
+
+def inbox_add(pane_id, agent, project, host, prompt, item_type="blocked"):
+    """Append an inbox item for a pane. Blocked items start pending; done
+    items land directly in the resolved (已完成) section."""
+    global _INBOX_SEQ
+    if item_type != "done":
+        for item in INBOX:
+            if item.get("pane_id") == pane_id and not item.get("resolved"):
+                return None
+    _INBOX_SEQ += 1
+    resolved = item_type == "done"
+    item = {
+        "id": f"in{_INBOX_SEQ}",
+        "pane_id": pane_id,
+        "agent": agent,
+        "project": project,
+        "host": host,
+        "prompt": (prompt or "")[:500],
+        "ts": time.time(),
+        "type": item_type,
+        "resolved": resolved,
+        "resolved_ts": time.time() if resolved else None,
+    }
+    INBOX.append(item)
+    if len(INBOX) > INBOX_MAX:
+        del INBOX[: len(INBOX) - INBOX_MAX]
+    _save_inbox(INBOX)
+    return item
+
+
+def inbox_resolve_pane(pane_id):
+    """Mark all pending items of a pane resolved (agent got unblocked)."""
+    changed = False
+    for item in INBOX:
+        if item.get("pane_id") == pane_id and not item.get("resolved"):
+            item["resolved"] = True
+            item["resolved_ts"] = time.time()
+            changed = True
+    if changed:
+        _save_inbox(INBOX)
+    return changed
+
+
+def parse_questionnaire(content):
+    """Detect a pi questionnaire UI in pane content.
+
+    Render format (single question):
+        ──...
+        <prompt>
+        1. option one
+        2. option two
+        ↑↓ navigate • Enter select • Esc cancel
+        ──...
+    Multi-question adds a tab bar above and a Submit tab with
+    "Ready to submit" / "Press Enter to submit".
+    Returns {"prompt", "options", "submit"} or None.
+    """
+    if not content:
+        return None
+    if "navigate" not in content and "Ready to submit" not in content and "Enter to submit" not in content:
+        return None
+    lines = content.splitlines()
+    opts = []
+    prompt_lines = []
+    in_q = False
+    for line in lines:
+        t = line.strip()
+        if not t:
+            continue
+        m = re.match(r"^(\d+)\.\s+(.+)$", t)
+        if m and not in_q:
+            in_q = True
+            opts.append([int(m.group(1)), m.group(2).strip()])
+            continue
+        if in_q:
+            if m:
+                opts.append([int(m.group(1)), m.group(2).strip()])
+                continue
+            if ("navigate" in t or "Enter to submit" in t or "Unanswered" in t
+                    or t.startswith("\u2500") or t.startswith("Ready")):
+                break
+            # description lines or the "> " cursor row: ignore for v1
+            continue
+        prompt_lines.append(line)
+    # Submit tab has no numbered options — recognize it by its banner.
+    if any(k in content for k in ("Ready to submit", "Press Enter to submit", "Unanswered:")):
+        if not opts:
+            return {"prompt": "Ready to submit", "options": [], "submit": True}
+    if len(opts) < 2:
+        return None
+    # strip the top rule line and multi-question tab bar from the prompt
+    clean = []
+    for line in prompt_lines:
+        t = line.strip()
+        if not t or t.startswith("\u2500") or t.startswith("←") or t.startswith("→"):
+            continue
+        clean.append(line)
+    options = [{"index": i, "label": label.rstrip()} for i, label in opts]
+    prompt = "\n".join(clean).strip()
+    submit = any(k in content for k in ("Ready to submit", "Press Enter to submit", "Unanswered:"))
+    return {"prompt": prompt[:300], "options": options, "submit": submit}
+
+
+async def report_done(pane_id, agent, project, host):
+    """Completion notification: push + inbox record (resolved section)."""
+    item = inbox_add(pane_id, agent, project, host, "", item_type="done")
+    if item:
+        await broadcast({"type": "inbox_update", "item": item})
+    await send_web_push(
+        title=f"✅ {project} 完成",
+        body=f"{agent or 'agent'} · {pane_id}",
+        url=f"/?pane={pane_id}",
+    )
+
+
+async def report_blocked(pane_id, agent, project, host, content, remote=None):
+    """Broadcast blocked/questionnaire/inbox for a newly-blocked pane."""
+    options = detect_options(content)
+    await broadcast({
+        "type": "blocked", "pane_id": pane_id,
+        "agent": agent, "project": project,
+        "host": host,
+        "prompt": (content or "")[:500],
+        "options": options or TOOL_OPTIONS
+    })
+    q = parse_questionnaire(content)
+    if q:
+        q["pane_id"] = pane_id
+        q["agent"] = agent
+        q["project"] = project
+        q["host"] = host
+        await broadcast({"type": "questionnaire", **q})
+    item = inbox_add(pane_id, agent, project, host, content)
+    if item:
+        await broadcast({"type": "inbox_update", "item": item})
+    await send_web_push(
+        title=f"🐑 {project} blocked",
+        body=(content or "")[:120],
+        url=f"/?pane={pane_id}",
+    )
 
 
 async def broadcast(msg):
@@ -281,24 +515,19 @@ async def _poll_once():
             pid, status = a["pane_id"], a["status"]
             if status == "blocked" and last_statuses.get(pid) != "blocked":
                 content = read_pane(pid, remote=a.get("remote"))
-                options = detect_options(content)
-                await broadcast({
-                    "type": "blocked", "pane_id": pid,
-                    "agent": a["agent"], "project": a["project"],
-                    "host": a.get("host", "local"),
-                    "prompt": content[:500],
-                    "options": options or TOOL_OPTIONS
-                })
-                # Web Push notification
-                await send_web_push(
-                    title=f"🐑 {a['project']} blocked",
-                    body=content[:120],
-                    url=f"/?pane={pid}",
-                )
-            # Send clear push when agent unblocks
+                await report_blocked(pid, a["agent"], a["project"], a.get("host", "local"), content, remote=a.get("remote"))
+            # Send clear push when agent unblocks, and resolve its inbox item
             if status != "blocked" and last_statuses.get(pid) == "blocked":
                 await send_web_push("", "", clear=True)
+                await broadcast({"type": "questionnaire_clear", "pane_id": pid})
+                if inbox_resolve_pane(pid):
+                    await broadcast({"type": "inbox_resolve", "pane_id": pid})
+            # Completion notification: working → idle/done (subagents run
+            # inside the same pane, so they never flip the pane state)
+            if status in ("idle", "done") and last_statuses.get(pid) == "working":
+                await report_done(pid, a["agent"], a["project"], a.get("host", "local"))
             last_statuses[pid] = status
+        await broadcast({"type": "inbox", "items": INBOX})
         # Clean up panes that are no longer reported
         current_pane_ids = {a["pane_id"] for a in agents}
         stale = known_panes - current_pane_ids
@@ -333,21 +562,39 @@ async def event_push():
                 content = read_pane(pane_id, remote=remote)
             else:
                 content = event.get("prompt", "Agent is blocked")
-            options = detect_options(content)
-            await broadcast({
-                "type": "blocked", "pane_id": pane_id,
-                "agent": agent_data.get("agent", ""),
-                "project": agent_data.get("project", ""),
-                "host": host,
-                "prompt": content[:500],
-                "options": options or TOOL_OPTIONS
-            })
+            await report_blocked(pane_id, agent_data.get("agent", ""), agent_data.get("project", ""), host, content, remote=remote)
+            last_statuses[pane_id] = "blocked"
+        elif status != "blocked" and last_statuses.get(pane_id) == "blocked":
+            # event-driven unblock: clear push + resolve inbox
+            await send_web_push("", "", clear=True)
+            await broadcast({"type": "questionnaire_clear", "pane_id": pane_id})
+            if inbox_resolve_pane(pane_id):
+                await broadcast({"type": "inbox_resolve", "pane_id": pane_id})
+            last_statuses[pane_id] = status
+        elif status in ("idle", "done") and last_statuses.get(pane_id) == "working":
+            # event-driven completion: push + inbox record
+            await report_done(pane_id, agent_data.get("agent", ""), agent_data.get("project", ""), host)
+            last_statuses[pane_id] = status
 
         if update:
             known_panes.add(pane_id)
             pane_remote_map.setdefault(pane_id, None)
             agent_cache[pane_id] = {**agent_cache.get(pane_id, {}), **update["agent"]}
+            last_statuses[pane_id] = status
             await broadcast(update)
+
+
+def _request_token(request):
+    token = None
+    for key, value in request.headers.raw_items():
+        if key.lower() == "authorization":
+            token = value.replace("Bearer ", "")
+    if not token and "token=" in (request.path or ""):
+        import urllib.parse
+        _, qs = request.path.split("?", 1) if "?" in request.path else (request.path, "")
+        params = urllib.parse.parse_qs(qs)
+        token = params.get("token", [None])[0]
+    return token
 
 
 async def process_request(connection, request):
@@ -355,28 +602,15 @@ async def process_request(connection, request):
     from websockets.http11 import Response
     from websockets.datastructures import Headers
 
-    # Token auth (if configured)
-    if AUTH_TOKEN:
-        token = None
-        for key, value in request.headers.raw_items():
-            if key.lower() == "authorization":
-                token = value.replace("Bearer ", "")
-        # Also check query param ?token=
-        if not token and "token=" in (request.path or ""):
-            import urllib.parse
-            _, qs = request.path.split("?", 1) if "?" in request.path else (request.path, "")
-            params = urllib.parse.parse_qs(qs)
-            token = params.get("token", [None])[0]
-        if token != AUTH_TOKEN:
-            headers = Headers([("Content-Type", "text/plain")])
-            return Response(401, "Unauthorized", headers, b"Invalid token\n")
-
-    # Check if this is a WebSocket upgrade
+    # Check if this is a WebSocket upgrade — requires valid token
     upgrade = None
     for key, value in request.headers.raw_items():
         if key.lower() == "upgrade":
             upgrade = value.lower()
     if upgrade == "websocket":
+        if AUTH_TOKEN and _request_token(request) != AUTH_TOKEN:
+            headers = Headers([("Content-Type", "text/plain")])
+            return Response(401, "Unauthorized", headers, b"Invalid token\n")
         return None  # proceed with WebSocket handshake
 
     # For CORS preflight
@@ -398,6 +632,9 @@ async def process_request(connection, request):
         _, qs = (request.path or "").split("?", 1)
         params = urllib.parse.parse_qs(qs)
         if "d" in params:
+            if AUTH_TOKEN and _request_token(request) != AUTH_TOKEN:
+                headers = Headers([("Content-Type", "text/plain")])
+                return Response(401, "Unauthorized", headers, b"Invalid token\n")
             try:
                 event = json.loads(params["d"][0])  # parse_qs already decodes
                 event_queue.put_nowait(event)
@@ -407,8 +644,18 @@ async def process_request(connection, request):
             headers = Headers([("Access-Control-Allow-Origin", "*")])
             return Response(200, "OK", headers, b"ok\n")
 
-    # Serve web app for GET / or GET /index.html
     path = (request.path or "/").split("?")[0]
+
+    # A cheap process-level health signal for launchd/guards. Keep it public:
+    # it reveals no agent data and remains usable if auth config drifts.
+    if path == "/healthz":
+        headers = Headers([
+            ("Content-Type", "text/plain"),
+            ("Cache-Control", "no-store"),
+        ])
+        return Response(200, "OK", headers, b"ok\n")
+
+    # Serve web app for GET / or GET /index.html
     if path in ("/", "/index.html"):
         web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "web")
         index_path = os.path.join(web_dir, "index.html")
@@ -561,6 +808,53 @@ async def handle_client(ws):
                     await ws.send(json.dumps({"type": "tab_created", "ok": True}))
                 else:
                     await ws.send(json.dumps({"type": "error", "message": "workspace_id required"}))
+            elif msg_type == "questionnaire_answer":
+                pane_id = msg["pane_id"]
+                if pane_id not in known_panes:
+                    await ws.send(json.dumps({"type": "error", "message": "unknown pane_id"}))
+                    continue
+                remote = pane_remote_map.get(pane_id)
+                idx = msg.get("index")
+                submit = bool(msg.get("submit"))
+                keys = []
+                if submit:
+                    keys = ["Enter"]
+                else:
+                    # pi questionnaire is cursor+Enter driven: jump to top with
+                    # a burst of Up (clamped), then Down to the target, Enter.
+                    if isinstance(idx, int) and idx >= 1:
+                        keys = ["Up"] * 20 + ["Down"] * (idx - 1) + ["Enter"]
+                if not keys:
+                    await ws.send(json.dumps({"type": "error", "message": "invalid questionnaire answer"}))
+                    continue
+                log.info("Questionnaire answer from %s (%s): pane=%s index=%s submit=%s", ip, device, pane_id, idx, submit)
+                audit("questionnaire_answer", ip, device, pane_id, f"index={idx} submit={submit}")
+                result = run_herdr_result("pane", "send-keys", pane_id, *keys, remote=remote)
+                if result.returncode != 0:
+                    await ws.send(json.dumps({"type": "error", "message": "questionnaire answer failed"}))
+                    continue
+                await broadcast({"type": "questionnaire_clear", "pane_id": pane_id})
+                await ws.send(json.dumps({"type": "command_result", "command": "questionnaire_answer", "ok": True}))
+            elif msg_type == "inbox_resolve":
+                item_id = msg.get("id", "")
+                for item in INBOX:
+                    if item.get("id") == item_id and not item.get("resolved"):
+                        item["resolved"] = True
+                        item["resolved_ts"] = time.time()
+                        _save_inbox(INBOX)
+                        await broadcast({"type": "inbox_update", "item": item})
+                        await ws.send(json.dumps({"type": "command_result", "command": "inbox_resolve", "ok": True}))
+                        break
+                else:
+                    await ws.send(json.dumps({"type": "error", "message": "inbox item not found"}))
+            elif msg_type == "inbox_clear":
+                # clear all resolved items
+                before = len(INBOX)
+                INBOX[:] = [i for i in INBOX if not i.get("resolved")]
+                if len(INBOX) != before:
+                    _save_inbox(INBOX)
+                    await broadcast({"type": "inbox", "items": INBOX})
+                    await ws.send(json.dumps({"type": "command_result", "command": "inbox_clear", "ok": True}))
             elif msg_type == "push_subscribe":
                 sub = msg.get("subscription")
                 if sub and sub not in push_subscriptions:
@@ -594,15 +888,14 @@ def start_mdns():
     try:
         from zeroconf import Zeroconf, ServiceInfo
         import socket as sock_mod
-        import threading
         ip = sock_mod.gethostbyname(sock_mod.gethostname())
         info = ServiceInfo(
             "_herdr-remote._tcp.local.", "herdr-remote._herdr-remote._tcp.local.",
             addresses=[sock_mod.inet_aton(ip)], port=WS_PORT,
         )
         zc = Zeroconf()
-        threading.Thread(target=zc.register_service, args=(info,), daemon=True).start()
-        log.info("mDNS registering at %s", ip)
+        zc.register_service(info, allow_name_change=True)
+        log.info("mDNS registered at %s", ip)
         return zc, info
     except Exception as e:
         log.warning("mDNS skipped: %s", e)
@@ -627,9 +920,14 @@ async def main():
         loop.add_signal_handler(sig, stop.set_result, None)
     await stop
     server.close()
+    await server.wait_closed()
     if zc and info:
-        zc.unregister_service(info)
-        zc.close()
+        try:
+            zc.unregister_service(info)
+        except Exception as e:
+            log.warning("mDNS unregister failed: %s", e)
+        finally:
+            zc.close()
 
 
 if __name__ == "__main__":
