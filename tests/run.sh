@@ -70,7 +70,7 @@ grep -q "WebSocket" "$WEB" && grep -q "theme" "$WEB" && grep -q "sendKey" "$WEB"
 assert_eq "$?" "0" "has WebSocket, themes, keyboard"
 
 echo "12. web app profile wiring"
-python3 "$DIR/tests/test_builtin_profiles.py" "$WEB"
+python3 "$DIR/tests/test_builtin_profiles.py" "$WEB" && node "$DIR/tests/test_builtin_profiles.mjs" "$WEB"
 assert_eq "$?" "0" "profiles include both relay defaults"
 
 # --- macOS app ---
