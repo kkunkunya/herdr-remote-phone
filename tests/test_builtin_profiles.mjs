@@ -63,11 +63,13 @@ manual.elements.get('relayToken').value = 'manual-token';
 value(manual, 'saveAndConnect()');
 assertSocketUsesActiveProfile(manual, manual.sockets.at(-1));
 
-const legacy = boot({
-  herdr_profiles: JSON.stringify({ pro: { host: 'old-pro' }, air: { host: 'old-air' }, token: 'legacy-token' }),
-});
+const legacy = boot({ herdr_relay_token: 'legacy-token' });
 assert.equal(value(legacy, 'profiles.pro.token'), 'legacy-token');
 assert.equal(value(legacy, 'profiles.air.token'), 'legacy-token');
+
+const partial = boot({ herdr_profiles: JSON.stringify({ pro: { host: 'old-pro' }, token: 'legacy-token' }) });
+assert.equal(value(partial, 'profiles.pro.host'), 'old-pro');
+assert.equal(value(partial, 'profiles.air.token'), 'legacy-token');
 
 const push = boot();
 value(push, "pushSubscription = { toJSON() { return { endpoint: 'test' }; } }; connect()");

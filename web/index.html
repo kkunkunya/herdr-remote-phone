@@ -1367,17 +1367,16 @@ let lastPaneRaw = '';
 let offlineMode = false;
 
 function loadProfiles() {
+  let raw = {};
   try {
-    const raw = JSON.parse(localStorage.getItem('herdr_profiles') || 'null');
-    if (raw && raw.pro && raw.air) {
-      const legacyToken = raw.token || localStorage.getItem('herdr_relay_token') || '';
-      return {
-        pro: { ...DEFAULT_PROFILES.pro, host: raw.pro.host || DEFAULT_PROFILES.pro.host, token: raw.pro.token || legacyToken || DEFAULT_PROFILES.pro.token },
-        air: { ...DEFAULT_PROFILES.air, host: raw.air.host || DEFAULT_PROFILES.air.host, token: raw.air.token || legacyToken || DEFAULT_PROFILES.air.token },
-      };
-    }
+    const saved = JSON.parse(localStorage.getItem('herdr_profiles') || 'null');
+    if (saved && typeof saved === 'object') raw = saved;
   } catch (_) {}
-  return JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+  const legacyToken = raw.token || localStorage.getItem('herdr_relay_token') || '';
+  return {
+    pro: { ...DEFAULT_PROFILES.pro, host: raw.pro?.host || DEFAULT_PROFILES.pro.host, token: raw.pro?.token || legacyToken || DEFAULT_PROFILES.pro.token },
+    air: { ...DEFAULT_PROFILES.air, host: raw.air?.host || DEFAULT_PROFILES.air.host, token: raw.air?.token || legacyToken || DEFAULT_PROFILES.air.token },
+  };
 }
 function saveProfilesToStore() {
   localStorage.setItem('herdr_profiles', JSON.stringify(profiles));

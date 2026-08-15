@@ -66,7 +66,7 @@ Upstream install docs still apply for Herdi menu bar / Telegram / herdr-push:
 ## Security notes
 
 - Relay token grants terminal control. Keep tunnels authenticated.
-- This private deployment ships its relay token in both built-in profiles; anyone who can fetch this public page can control its relays.
+- This deployment ships its relay token in both built-in profiles; anyone who can fetch this public page can control its relays.
 - Model list in the UI is baked from the machine that built/deployed the page (`pi --list-models`). Refresh the page deploy after big model-catalog changes.
 
 ## Upstream
