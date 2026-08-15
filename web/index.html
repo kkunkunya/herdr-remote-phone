@@ -480,7 +480,7 @@ function saveAndConnect() {
   if (!url) return;
   const profile = activeProfile();
   profile.host = url;
-  profile.token = document.getElementById('relayToken').value.trim() || DEFAULT_PROFILES[activeProfileId].token;
+  profile.token = document.getElementById('relayToken').value.trim();
   saveProfilesToStore();
   applyActiveProfileToStorage();
   connect();

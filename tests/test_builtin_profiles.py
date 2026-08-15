@@ -20,7 +20,7 @@ for machine in ("pro", "air"):
 assert "const token = activeProfile().token;\n  let wsUrl = url;" in web, "WebSocket connections must use the active profile token"
 assert "const vapidToken = activeProfile().token || '';" in web, "push setup must use the active profile token"
 assert "if (pushSubscription) socket.send(JSON.stringify({type: 'push_subscribe', subscription: pushSubscription.toJSON()}));" in web, "profile reconnect must register existing push subscription"
-assert "profile.token = document.getElementById('relayToken').value.trim() || DEFAULT_PROFILES[activeProfileId].token;" in web, "manual connection override must apply only to the active profile"
+assert "profile.token = document.getElementById('relayToken').value.trim();" in web, "manual connection override must apply only to the active profile"
 assert "const legacyToken = raw.token || localStorage.getItem('herdr_relay_token') || '';" in web, "legacy shared token must migrate even without saved profiles"
 assert "profile.host = url;" in web, "manual relay URL must apply to the active profile"
 assert "token: raw.pro?.token || legacyToken || DEFAULT_PROFILES.pro.token" in web, "saved Pro override must survive reload"

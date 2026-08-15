@@ -63,6 +63,12 @@ manual.elements.get('relayToken').value = 'manual-token';
 value(manual, 'saveAndConnect()');
 assertSocketUsesActiveProfile(manual, manual.sockets.at(-1));
 
+const publicManual = boot();
+publicManual.elements.get('relayUrl').value = 'wss://public.example';
+publicManual.elements.get('relayToken').value = '';
+value(publicManual, 'saveAndConnect()');
+assert.equal(new URL(publicManual.sockets.at(-1).url).searchParams.get('token'), null);
+
 const legacy = boot({ herdr_relay_token: 'legacy-token' });
 assert.equal(value(legacy, 'profiles.pro.token'), 'legacy-token');
 assert.equal(value(legacy, 'profiles.air.token'), 'legacy-token');
