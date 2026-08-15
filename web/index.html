@@ -46,7 +46,7 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
 .settings h2 { font-size: 0.9rem; margin-bottom: 12px; }
 .setting-group { background: var(--surface); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
 .setting-group label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 6px; }
-.setting-group input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; }
+.setting-group input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; }
 .setting-group select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; }
 .setting-group .hint { font-size: 0.65rem; color: var(--muted); margin-top: 4px; }
 .setting-group button { margin-top: 8px; padding: 8px 16px; border-radius: 6px; border: none; background: var(--green); color: #000; font-weight: 600; font-size: 13px; cursor: pointer; }
@@ -87,7 +87,7 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
 .quick-actions button { padding: 10px 14px; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; flex: 1; min-width: 70px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .btn-yes { background: var(--green); color: #fff; } .btn-trust { background: var(--blue); color: #fff; } .btn-no { background: var(--red); color: #fff; }
 .term-input { border-top: 1px solid var(--border); padding: 8px 12px; display: flex; gap: 6px; background: var(--surface); flex-shrink: 0; }
-.term-input input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; font-family: monospace; min-width: 0; }
+.term-input input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-family: monospace; min-width: 0; }
 .term-input button:last-child { padding: 10px 14px; border-radius: 6px; border: none; background: var(--blue); color: #fff; font-weight: 700; font-size: 16px; flex-shrink: 0; }
 .term-keys { border-top: 1px solid var(--border); padding: 8px 12px; display: flex; flex-direction: column; background: var(--surface); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 8px); }
 .nav-key { padding: 10px 4px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
@@ -222,7 +222,27 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
 
 
 .offline-banner { margin:16px 12px; padding:16px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--muted); text-align:center; font-size:0.9rem; line-height:1.5; }
+
+.inbox-badge { position:absolute; top:2px; right:2px; background:var(--red); color:#fff; font-size:0.55rem; font-weight:700; min-width:14px; height:14px; border-radius:7px; line-height:14px; text-align:center; padding:0 3px; }
+.inbox-view { position:fixed; inset:0; background:var(--bg); z-index:60; overflow-y:auto; padding:12px; -webkit-overflow-scrolling:touch; }
+.inbox-top { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.inbox-top h2 { font-size:1rem; margin:0; }
+.inbox-top button { padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:0.75rem; }
+.inbox-item { background:var(--surface); border-radius:10px; padding:10px 12px; margin-bottom:8px; border:1px solid var(--border); }
+.inbox-item.done { opacity:0.55; }
+.inbox-head { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.inbox-title { font-size:0.85rem; font-weight:600; }
+.inbox-prompt { font-size:0.72rem; color:var(--muted); line-height:1.4; font-family:ui-monospace,Menlo,monospace; white-space:pre-wrap; word-break:break-all; margin-bottom:6px; }
+.inbox-item .btn-yes { padding:5px 12px; border-radius:6px; border:none; background:var(--green); color:#000; font-weight:600; font-size:0.72rem; }
+.questionnaire-card { display:none; padding:10px 12px; background:color-mix(in srgb, var(--blue) 8%, var(--surface)); border-bottom:1px solid var(--border); }
+.questionnaire-card.show { display:block; }
+.q-prompt { font-size:0.8rem; font-weight:600; margin-bottom:8px; }
+.q-options { display:flex; flex-direction:column; gap:6px; }
+.q-option { padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.78rem; text-align:left; }
+.q-option:active { background:var(--blue); color:#fff; }
+.questionnaire-card .btn-yes { padding:8px 16px; border-radius:8px; border:none; background:var(--blue); color:#fff; font-weight:700; font-size:0.85rem; width:100%; }
 </style>
+<style>*{touch-action:manipulation}</style>
 </head>
 <body>
 
@@ -232,10 +252,16 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
   <span id="connLabel" style="font-size:0.65rem;font-weight:500"></span>
   <span id="profileLabel" style="font-size:0.65rem;color:var(--muted);margin-left:6px"></span>
   <span id="agentCount" style="font-size:0.7rem;color:var(--muted);margin-left:auto"></span>
+  <button onclick="toggleInbox()" aria-label="Inbox" style="position:relative"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="inboxBadge" class="inbox-badge" style="display:none"></span></button>
   <button onclick="toggleTimeline()" aria-label="Timeline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
   <button onclick="toggleSettings()" aria-label="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
 </div>
 <div class="profile-bar" id="profileBar"></div>
+
+<div class="inbox-view" id="inboxView" style="display:none">
+  <div class="inbox-top"><h2>收件箱</h2><button onclick="clearInbox()">清空已完成</button><button onclick="toggleInbox()">关闭</button></div>
+  <div id="inboxList"></div>
+</div>
 
 <div class="settings" id="settingsView">
   <h2>Settings</h2>
@@ -293,6 +319,7 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
   </div>
   <div class="term-content" id="termContent">Loading…</div>
   <div class="term-status" id="termStatus"></div>
+  <div class="questionnaire-card" id="questionnaireCard"></div>
   <div class="quick-actions" id="quickActions"></div>
   <div class="term-input">
     <div class="composer-row">
@@ -405,7 +432,7 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
 
 <script>
 
-let ws = null, agents = [], activePane = null, refreshInterval = null, userScrolledUp = false;
+let ws = null, agents = [], activePane = null, refreshInterval = null, userScrolledUp = false, lastAgentsSig = null;
 let timeline = [], prevStatuses = {};
 let activeWorkspace = null;
 let activeTab = null;
@@ -555,7 +582,14 @@ function handleMessage(msg) {
       }
       prevStatuses[a.pane_id] = a.status;
     }
+    const sig = JSON.stringify(msg.agents);
+    // Full snapshot every 2s from the relay: skip re-render when nothing
+    // changed so scrolling the agent list isn't yanked back to the top.
+    if (sig === lastAgentsSig) return;
+    const sy = window.scrollY;
+    lastAgentsSig = sig;
     agents = msg.agents; render();
+    window.scrollTo(0, sy);
   }
   else if (msg.type === 'agent_update') {
     const update = msg.agent;
@@ -579,6 +613,12 @@ function handleMessage(msg) {
     timeline.unshift({project: msg.project, agent: msg.agent, status: 'blocked', time: new Date()});
     if (timeline.length > 100) timeline.pop();
     render();
+  } else if (msg.type === 'inbox' || msg.type === 'inbox_update' || msg.type === 'inbox_resolve') {
+    handleInboxMsg(msg);
+  } else if (msg.type === 'questionnaire') {
+    handleQuestionnaire(msg);
+  } else if (msg.type === 'questionnaire_clear') {
+    clearQuestionnaire(msg.pane_id);
   } else if (msg.type === 'pane_content' && msg.pane_id === activePane) {
     const el = document.getElementById('termContent');
     const prevHeight = el.scrollHeight;
@@ -619,7 +659,7 @@ function renderWorkspaces(workspaces) {
   for (const wsId of workspaces) {
     const wsAgents = agents.filter(a => a.workspace_id === wsId);
     const hasBlocked = wsAgents.some(a => a.status === 'blocked');
-    const name = wsAgents[0]?.project || wsId.slice(0, 8);
+    const name = wsAgents[0]?.workspace_label || wsAgents[0]?.project || wsId.slice(0, 8);
     html += `<button class="chip${activeWorkspace===wsId?' active':''}${hasBlocked?' alert':''}" onclick="selectWorkspace('${wsId}')">${name}</button>`;
   }
   html += `</div>`;
@@ -726,6 +766,7 @@ function openTerminal(paneId) {
     qa.innerHTML='';
     ak.innerHTML='';
   }
+  renderQuestionnaire(questionnaireByPane[paneId] || null);
   refreshPane();
   refreshInterval = setInterval(refreshPane, 3000);
 }
@@ -734,6 +775,8 @@ function closeTerminal() {
   activePane = null; clearInterval(refreshInterval);
   document.getElementById('terminalView').classList.remove('active');
   document.getElementById('agentListView').style.display = '';
+  const qc = document.getElementById('questionnaireCard');
+  if (qc) { qc.classList.remove('show'); qc.innerHTML = ''; }
 }
 
 let paneLines = 200;
@@ -1186,6 +1229,8 @@ function extractModelFromFooterLines(footerLines) {
     if (m) return m[1];
     m = t.match(/\b(gpt-[\w.\-]+|deepseek-[\w.\-]+|kimi-[\w.\-]+|claude-[\w.\-]+|grok-[\w.\-]+)\b/i);
     if (m) return m[1];
+    m = t.match(/\b([A-Za-z0-9 .+\-]{2,40}?)\s*\(combo\)/);
+    if (m) return m[1].trim();
   }
   return null;
 }
@@ -1284,7 +1329,8 @@ async function togglePush() {
     try {
       const relayUrl = localStorage.getItem('herdr_relay_url') || '';
       const httpUrl = relayUrl.replace('wss://', 'https://').replace('ws://', 'http://');
-      const resp = await fetch(httpUrl + '/api/vapid-public-key');
+      const vapidToken = localStorage.getItem('herdr_relay_token') || '';
+      const resp = await fetch(httpUrl + '/api/vapid-public-key' + (vapidToken ? '?token=' + encodeURIComponent(vapidToken) : ''));
       const {publicKey} = await resp.json();
       if (!publicKey) {
         document.getElementById('pushStatus').textContent = 'VAPID key not configured on relay';
@@ -1317,8 +1363,8 @@ function urlBase64ToUint8Array(base64String) {
 
 // --- kun: profiles + thin filter ---
 const DEFAULT_PROFILES = {
-  pro: { id:'pro', label:'Pro', host:'macbook-pro.example.com', token:'' },
-  air: { id:'air', label:'Air', host:'macbook-air.example.com', token:'' },
+  pro: { id:'pro', label:'Pro', host:'macbook-pro.kunkunzheten.top', token:'' },
+  air: { id:'air', label:'Air', host:'macbook-air.kunkunzheten.top', token:'' },
 };
 let profiles = loadProfiles();
 let activeProfileId = localStorage.getItem('herdr_active_profile') || guessProfileFromLocation() || 'pro';
@@ -1401,6 +1447,7 @@ function switchProfile(id) {
   localStorage.setItem('herdr_active_profile', id);
   offlineMode = false;
   agents = [];
+  lastAgentsSig = null;
   activeWorkspace = null;
   activeTab = null;
   if (activePane) closeTerminal();
@@ -1531,6 +1578,8 @@ function isUserBoxStart(line) {
 function isFooterLine(line) {
   const t = line.trim();
   if (!t) return false;
+  // lines inside a user/agent box (│ prefix) are content, never footer
+  if (/^[│╰╭]/.test(t)) return false;
   // path + branch: ~/.agents/... (main) or /Volumes/... (feat/x)
   if (/^[~\/].+\s+\([^)]+\)\s*$/.test(t) && !/\s{2,}/.test(t.replace(/\s+\([^)]+\)\s*$/,''))) return true;
   // token / context bar: ↑1.2M ↓95k ... 59.4%/400k ... gcli/grok-4.5
@@ -1551,6 +1600,7 @@ function isNoiseLine(line) {
   if (/^Warning:|^Error:|^WARN\b|^ERROR\b|^INFO\b|^DEBUG\b/i.test(t)) return true;
   if (/not found in registry|Falling back|Released pi-|Chrome Bridge|multimodal-proxy|pruner:|system-awake/i.test(t)) return true;
   if (/bypass permissions|esc to (interrupt|cancel)|ctrl\+c to|type to queue/i.test(t)) return true;
+  if (/上下文压缩|compaction|请根据摘要继续当前未完成的任务/i.test(t)) return true;
   if (/^\(9router\)|^\d+(\.\d+)?%\/\d+k|ctx ─+|Working\.\.\.|Baking…|Baking\.\.\./i.test(t)) return true;
   if (/^\.\.\. \(\d+ more lines/.test(t)) return true;
   if (/^[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/.test(t)) return true;
@@ -1596,11 +1646,30 @@ function foldPreview(block) {
   const first = (block.find(l => l.trim()) || '').trim().replace(/^\$\s*/, '');
   return (first.slice(0, 64) || '…');
 }
+function splitFooterLine(line) {
+  // pi renders its whole status bar as one line with private-use icon glyphs
+  // as segment separators. Split it back into per-segment lines so each
+  // segment becomes its own status chip.
+  const t = line.trim();
+  if (!/think:\S+/i.test(t)) return [line];
+  if (!/(\(combo\)|Chrome Bridge|system-awake|文件夹|分支|\uf115|\uf126)/.test(t)) return [line];
+  const tagged = t.replace(/\uf115/g, '◆文件夹◆ ').replace(/\uf126/g, '◆分支◆ ');
+  return tagged.split(/[\ue000-\uf8ff]/)
+    .map(s => s.replace(/[\ue000-\uf8ff]/g, '').trim())
+    .filter(Boolean)
+    .map(s => s.replace(/◆文件夹◆/, '文件夹 ').replace(/◆分支◆/, '分支 ').trim());
+}
+
 function classifyFooterLine(line) {
   const t = line.trim().replace(/\s+/g, ' ');
   if (/[↑↓]/.test(t) && (/%\//.test(t) || /\/\d+k\b/i.test(t) || /\bCH\d/.test(t))) return 'ctx';
-  if (/\(\d+router\)|\bgcli\/|\bcodex\/|•\s*(max|high|medium|low)\b/i.test(t)) return 'model';
+  // ctx without arrows: 156k/1.0M (15.6%)
+  if (/\d+(?:\.\d+)?[kKM]?\/\d+(?:\.\d+)?[kKM]?\s*\(\s*[\d.]+%\s*\)/.test(t)) return 'ctx';
+  // token counter segment: 11M
+  if (/^\d+(?:\.\d+)?[kKM]$/.test(t)) return 'ctx';
+  if (/\(\d+router\)|\bcombo\b|\bgcli\/|\bcodex\/|•\s*(max|high|medium|low)\b/i.test(t)) return 'model';
   if (/Chrome Bridge|system-awake|pruner:|multimodal-proxy/i.test(t)) return 'bridge';
+  if (/^(文件夹|分支)\s+\S+/.test(t)) return 'path';
   if (/^[~\/].+\([^)]+\)\s*$/.test(t)) return 'path';
   if (/(gcli|gpt|claude|grok|deepseek|gemini|router)\//i.test(t)) return 'model';
   return 'meta';
@@ -1623,11 +1692,13 @@ function renderFooterStatus(footerLines, todos) {
   }
   const cleaned = [];
   for (const l of footerLines || []) {
-    const t = l.trim().replace(/\s+/g, ' ');
-    if (!t || isRuleLine(l) || isTodoHeader(l) || isTodoItemLine(l)) continue;
-    if (!cleaned.includes(t)) cleaned.push(t);
+    for (const seg of splitFooterLine(l)) {
+      const t = seg.trim().replace(/\s+/g, ' ');
+      if (!t || isRuleLine(seg) || isTodoHeader(seg) || isTodoItemLine(seg)) continue;
+      if (!cleaned.includes(t)) cleaned.push(t);
+    }
   }
-  const keep = cleaned.slice(-6);
+  const keep = cleaned.slice(-8);
   const chips = [];
   // Model chip first (always visible when known)
   if (selectedModel && (selectedModel.id || selectedModel.ref || selectedModel.label)) {
@@ -1693,6 +1764,114 @@ function renderFooterStatus(footerLines, todos) {
   el.classList.add('show');
   el.innerHTML = chips.join('');
 }
+function stripEmbeddedFooter(line) {
+  // Messages sometimes carry an inline pi footer snapshot (model · think ·
+  // folder · branch · ctx · tokens · bridge) pasted as context. Strip just
+  // that span so it doesn't spam the transcript; the live footer chips
+  // already show the same info. The message prefix/suffix is kept.
+  if (!line || !/Chrome Bridge|system-awake/.test(line)) return line;
+  // primary: footer starts at a private-use glyph before the model segment
+  const re = /[\ue000-\uf8ff][^\n]*?\(combo\)[\s\S]*?Chrome Bridge[^\n]*?(?=\s*---|$)/i;
+  const m = line.match(re);
+  if (m) return line.slice(0, m.index) + line.slice(m.index + m[0].length);
+  // fallback: no glyphs (plain-text paste) — drop from think: onward
+  const re2 = /\s*think:\S+[\s\S]*?Chrome Bridge[^\n]*?(?=\s*---|$)/i;
+  const m2 = line.match(re2);
+  if (m2) return line.slice(0, m2.index) + line.slice(m2.index + m2[0].length);
+  return line;
+}
+
+// --- Inbox ---
+let inboxItems = [];
+let inboxOpen = false;
+
+function handleInboxMsg(msg) {
+  if (msg.type === 'inbox') { inboxItems = msg.items || []; }
+  else if (msg.type === 'inbox_update') {
+    const item = msg.item; if (!item) return;
+    const i = inboxItems.findIndex(x => x.id === item.id);
+    if (i >= 0) inboxItems[i] = item; else inboxItems.push(item);
+  } else if (msg.type === 'inbox_resolve') {
+    const now = Date.now() / 1000;
+    inboxItems.forEach(x => { if (x.pane_id === msg.pane_id) { x.resolved = true; x.resolved_ts = now; } });
+  }
+  renderInboxUI();
+}
+function pendingInbox() { return inboxItems.filter(x => !x.resolved).length; }
+function renderInboxUI() {
+  const badge = document.getElementById('inboxBadge');
+  const n = pendingInbox();
+  if (badge) { badge.textContent = n > 99 ? '99+' : n; badge.style.display = n ? '' : 'none'; }
+  const list = document.getElementById('inboxList');
+  if (!list) return;
+  const pending = inboxItems.filter(x => !x.resolved).sort((a, b) => b.ts - a.ts);
+  const done = inboxItems.filter(x => x.resolved).sort((a, b) => (b.resolved_ts || b.ts) - (a.resolved_ts || a.ts));
+  const card = (x) => `<div class="inbox-item${x.resolved ? ' done' : ''}" onclick="openInboxPane('${x.pane_id}')">
+    <div class="inbox-head"><span class="dot" style="background:${x.resolved ? 'var(--muted)' : 'var(--red)'}"></span>
+      <span class="inbox-title">${x.type === 'done' ? '✅ ' : ''}${escHtml(x.project || x.agent || x.pane_id)}${x.host && x.host !== 'local' ? ` <span style="color:var(--orange)">@${escHtml(x.host)}</span>` : ''}</span>
+      <span style="margin-left:auto;font-size:0.65rem;color:var(--muted)">${new Date(x.ts * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+    </div>
+    <div class="inbox-prompt">${x.type === 'done' ? '已完成' : escHtml((x.prompt || '').slice(0, 160))}</div>
+    ${x.resolved ? '' : `<button type="button" class="btn-yes" onclick="event.stopPropagation();resolveInbox('${x.id}')">标记完成</button>`}
+  </div>`;
+  let html = '';
+  if (pending.length) html += `<div class="section-header" style="color:var(--red)">未处理 (${pending.length})</div>` + pending.map(card).join('');
+  else html += '<div class="empty">没有待处理</div>';
+  if (done.length) html += `<div class="section-header" style="color:var(--muted)">已完成 (${done.length})</div>` + done.map(card).join('');
+  list.innerHTML = html;
+}
+function toggleInbox() {
+  inboxOpen = !inboxOpen;
+  const v = document.getElementById('inboxView');
+  if (v) { v.style.display = inboxOpen ? 'block' : 'none'; if (inboxOpen) renderInboxUI(); }
+}
+function openInboxPane(paneId) {
+  const a = agents.find(x => x.pane_id === paneId);
+  if (a) { openTerminal(paneId); toggleInbox(); }
+}
+function resolveInbox(id) {
+  if (ws && ws.readyState === 1) ws.send(JSON.stringify({type: 'inbox_resolve', id}));
+}
+function clearInbox() {
+  if (ws && ws.readyState === 1) ws.send(JSON.stringify({type: 'inbox_clear'}));
+}
+
+// --- Questionnaire (pi) ---
+let questionnaireByPane = {};
+function handleQuestionnaire(msg) {
+  questionnaireByPane[msg.pane_id] = msg;
+  if (activePane === msg.pane_id) renderQuestionnaire(msg);
+}
+function clearQuestionnaire(paneId) {
+  delete questionnaireByPane[paneId];
+  if (activePane === paneId) renderQuestionnaire(null);
+}
+function renderQuestionnaire(q) {
+  const el = document.getElementById('questionnaireCard');
+  if (!el) return;
+  if (!q) { el.classList.remove('show'); el.innerHTML = ''; return; }
+  let html = `<div class="q-prompt">${escHtml(q.prompt)}</div>`;
+  if (q.submit) {
+    html += `<button type="button" class="btn-yes" onclick="submitQuestionnaire('${q.pane_id}')">提交</button>`;
+  } else {
+    html += `<div class="q-options">${(q.options || []).map(o => `<button type="button" class="q-option" onclick="answerQuestionnaire('${q.pane_id}',${o.index})">${o.index}. ${escHtml(o.label)}</button>`).join('')}</div>`;
+  }
+  el.innerHTML = html;
+  el.classList.add('show');
+}
+function answerQuestionnaire(paneId, index) {
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({type: 'questionnaire_answer', pane_id: paneId, index}));
+    clearQuestionnaire(paneId);
+  }
+}
+function submitQuestionnaire(paneId) {
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({type: 'questionnaire_answer', pane_id: paneId, submit: true}));
+    clearQuestionnaire(paneId);
+  }
+}
+
 function renderPaneContent(el, raw) {
   lastPaneRaw = raw || '';
   const toggle = document.getElementById('thinFilterToggle');
@@ -1709,22 +1888,26 @@ function renderPaneContent(el, raw) {
   currentTodos = todo ? { summary: todo.summary, lines: todo.lines, done: todo.done, total: todo.total } : null;
   let workLines = lines;
   if (todo) workLines = lines.slice(0, todo.start).concat(lines.slice(todo.end));
-  // collect footer from the bottom (status bar lives there)
+  // collect footer from the bottom (status bar lives there). The footer
+  // block is the LAST footer line anywhere in the buffer, so scan the whole
+  // buffer for it — command echoes / spinners may sit below it in scrollback.
   const footer = [];
   let end = workLines.length;
-  // scan last ~12 non-empty-ish lines for footer cluster
-  for (let k = workLines.length - 1; k >= 0 && footer.length < 8; k--) {
-    const t = workLines[k].trim();
-    if (!t) continue;
-    if (isFooterLine(workLines[k]) || isRuleLine(workLines[k])) {
-      footer.unshift(workLines[k]);
-      end = k;
-      continue;
+  let lastF = -1;
+  for (let k = workLines.length - 1; k >= 0; k--) {
+    if (isFooterLine(workLines[k])) { lastF = k; break; }
+  }
+  if (lastF >= 0) {
+    footer.push(workLines[lastF]);
+    end = lastF;
+    for (let k = lastF - 1; k >= 0 && footer.length < 8; k--) {
+      if (isFooterLine(workLines[k]) || isRuleLine(workLines[k])) {
+        footer.unshift(workLines[k]);
+        end = k;
+      } else {
+        break;
+      }
     }
-    // stop at first real chat/content from bottom once we already have footer
-    if (footer.length) break;
-    // if bottom is not footer, don't force
-    break;
   }
   // if we only grabbed rules, clear
   if (footer.every(l => isRuleLine(l) || !l.trim())) {
@@ -1752,7 +1935,7 @@ function renderPaneContent(el, raw) {
         }
         break;
       }
-      const text = block.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+      const text = block.map(l => stripEmbeddedFooter(l)).join('\n').replace(/\n{3,}/g, '\n\n').trim();
       if (text) segs.push({ type: 'user', text });
       else hidden++;
       continue;
