@@ -54,17 +54,19 @@ Or use named Cloudflare tunnels and open:
 https://<your-host>/?token=<relay-token>
 ```
 
-Configure machines in the phone Settings panel (Pro/Air host + token). Do **not** commit real tokens.
+Pro / Air use the built-in fixed profiles and connect immediately; Settings remains available for an override.
 
 Upstream install docs still apply for Herdi menu bar / Telegram / herdr-push:
 
 - Upstream README: [dcolinmorgan/herdr-remote](https://github.com/dcolinmorgan/herdr-remote)
+- Demo: [herdr-demo.pages.dev](https://herdr-demo.pages.dev)
+- Push plugin: [dcolinmorgan/herdr-push](https://github.com/dcolinmorgan/herdr-push)
 - Quick start remains in `QUICKSTART.md`
 
 ## Security notes
 
 - Relay token grants terminal control. Keep tunnels authenticated.
-- This repo ships **empty** default profile tokens.
+- This private deployment ships its relay token in both built-in profiles; anyone who can fetch this public page can control its relays.
 - Model list in the UI is baked from the machine that built/deployed the page (`pi --list-models`). Refresh the page deploy after big model-catalog changes.
 
 ## Upstream

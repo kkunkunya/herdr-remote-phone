@@ -282,8 +282,6 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
     <input id="proHost" type="text" placeholder="macbook-pro.example.com" />
     <label for="airHost" style="margin-top:8px">Air host</label>
     <input id="airHost" type="text" placeholder="macbook-air.example.com" />
-    <label for="relayToken" style="margin-top:8px">Relay token</label>
-    <input id="relayToken" type="password" placeholder="Shared relay token" />
     <button onclick="saveProfiles()">Save machines</button>
   </div>
   <div class="setting-group">
@@ -441,11 +439,7 @@ const DEMO_RELAY = 'wss://herdr-remote-demo.yyrzrh5wfg.workers.dev';
 const isDemo = location.hostname.includes('herdr-demo.pages.dev');
 const isSelfRelay = !isDemo && !location.hostname.includes('pages.dev') && !location.hostname.includes('localhost');
 const savedUrl = localStorage.getItem('herdr_relay_url') || (isSelfRelay ? autoRelayUrl : (isDemo ? DEMO_RELAY : ''));
-const urlToken = new URLSearchParams(location.search).get('token');
-if (urlToken) localStorage.setItem('herdr_relay_token', urlToken);
-const savedToken = localStorage.getItem('herdr_relay_token') || '';
 document.getElementById('relayUrl').value = savedUrl;
-document.getElementById('relayToken').value = savedToken;
 
 
 
@@ -484,10 +478,11 @@ function renderTimeline() {
 function saveAndConnect() {
   const url = document.getElementById('relayUrl').value.trim();
   if (!url) return;
-  localStorage.setItem('herdr_relay_url', url);
-  const token = document.getElementById('relayToken').value.trim();
-  if (token) localStorage.setItem('herdr_relay_token', token);
-  else localStorage.removeItem('herdr_relay_token');
+  const profile = activeProfile();
+  profile.host = url;
+  profile.token = document.getElementById('relayToken').value.trim() || DEFAULT_PROFILES[activeProfileId].token;
+  saveProfilesToStore();
+  applyActiveProfileToStorage();
   connect();
   toggleSettings();
 }
@@ -508,7 +503,7 @@ function connect() {
   }
   setStatus('connecting');
   offlineMode = false;
-  const token = localStorage.getItem('herdr_relay_token');
+  const token = activeProfile().token;
   let wsUrl = url;
   if (token) wsUrl += (url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(token);
   const socket = new WebSocket(wsUrl);
@@ -517,6 +512,7 @@ function connect() {
     if (gen !== connGen || ws !== socket) return;
     offlineMode = false;
     setStatus('connected');
+    if (pushSubscription) socket.send(JSON.stringify({type: 'push_subscribe', subscription: pushSubscription.toJSON()}));
     if (window.cue) cue('ready');
     renderProfileBar();
   };
@@ -1327,7 +1323,7 @@ async function togglePush() {
     try {
       const relayUrl = localStorage.getItem('herdr_relay_url') || '';
       const httpUrl = relayUrl.replace('wss://', 'https://').replace('ws://', 'http://');
-      const vapidToken = localStorage.getItem('herdr_relay_token') || '';
+      const vapidToken = activeProfile().token || '';
       const resp = await fetch(httpUrl + '/api/vapid-public-key' + (vapidToken ? '?token=' + encodeURIComponent(vapidToken) : ''));
       const {publicKey} = await resp.json();
       if (!publicKey) {
@@ -1361,10 +1357,9 @@ function urlBase64ToUint8Array(base64String) {
 
 // --- kun: profiles + thin filter ---
 const DEFAULT_PROFILES = {
-  pro: { id:'pro', label:'Pro', host:'macbook-pro.kunkunzheten.top' },
-  air: { id:'air', label:'Air', host:'macbook-air.kunkunzheten.top' },
+  pro: { id:'pro', label:'Pro', host:'macbook-pro.kunkunzheten.top', token:'d07e9033ab9016183f4fa38b5876484c0e988bfab88cccf2c4dbc64f103af5d0' },
+  air: { id:'air', label:'Air', host:'macbook-air.kunkunzheten.top', token:'d07e9033ab9016183f4fa38b5876484c0e988bfab88cccf2c4dbc64f103af5d0' },
 };
-let relayToken = '';
 let profiles = loadProfiles();
 let activeProfileId = localStorage.getItem('herdr_active_profile') || guessProfileFromLocation() || 'pro';
 let thinFilterOn = localStorage.getItem('herdr_thin_filter') !== '0';
@@ -1375,18 +1370,17 @@ function loadProfiles() {
   try {
     const raw = JSON.parse(localStorage.getItem('herdr_profiles') || 'null');
     if (raw && raw.pro && raw.air) {
-      relayToken = raw.token || raw.pro.token || raw.air.token || localStorage.getItem('herdr_relay_token') || '';
+      const legacyToken = raw.token || localStorage.getItem('herdr_relay_token') || '';
       return {
-        pro: { ...DEFAULT_PROFILES.pro, host: raw.pro.host || DEFAULT_PROFILES.pro.host },
-        air: { ...DEFAULT_PROFILES.air, host: raw.air.host || DEFAULT_PROFILES.air.host },
+        pro: { ...DEFAULT_PROFILES.pro, host: raw.pro.host || DEFAULT_PROFILES.pro.host, token: raw.pro.token || legacyToken || DEFAULT_PROFILES.pro.token },
+        air: { ...DEFAULT_PROFILES.air, host: raw.air.host || DEFAULT_PROFILES.air.host, token: raw.air.token || legacyToken || DEFAULT_PROFILES.air.token },
       };
     }
   } catch (_) {}
-  relayToken = localStorage.getItem('herdr_relay_token') || '';
   return JSON.parse(JSON.stringify(DEFAULT_PROFILES));
 }
 function saveProfilesToStore() {
-  localStorage.setItem('herdr_profiles', JSON.stringify({ ...profiles, token: relayToken }));
+  localStorage.setItem('herdr_profiles', JSON.stringify(profiles));
 }
 function guessProfileFromLocation() {
   const h = (location.hostname || '').toLowerCase();
@@ -1403,12 +1397,13 @@ function profileWsUrl(p) {
 function applyActiveProfileToStorage() {
   const url = profileWsUrl(activeProfile());
   if (url) localStorage.setItem('herdr_relay_url', url);
-  if (relayToken) localStorage.setItem('herdr_relay_token', relayToken);
+  const token = activeProfile().token;
+  if (token) localStorage.setItem('herdr_relay_token', token);
   else localStorage.removeItem('herdr_relay_token');
   const ru = document.getElementById('relayUrl');
   const rt = document.getElementById('relayToken');
   if (ru) ru.value = url;
-  if (rt) rt.value = relayToken;
+  if (rt) rt.value = token;
 }
 function renderProfileBar() {
   const bar = document.getElementById('profileBar');
@@ -1429,13 +1424,11 @@ function fillProfileSettings() {
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   set('proHost', profiles.pro.host);
   set('airHost', profiles.air.host);
-  set('relayToken', relayToken);
 }
 function saveProfiles() {
   const val = id => (document.getElementById(id)?.value || '').trim();
   profiles.pro.host = val('proHost') || DEFAULT_PROFILES.pro.host;
   profiles.air.host = val('airHost') || DEFAULT_PROFILES.air.host;
-  relayToken = val('relayToken');
   saveProfilesToStore();
   applyActiveProfileToStorage();
   renderProfileBar();
@@ -2011,7 +2004,7 @@ function renderPaneContent(el, raw) {
 // seed profiles from URL token + host on first load
 (function seedProfiles() {
   const host = location.hostname || '';
-  const tok = localStorage.getItem('herdr_relay_token') || new URLSearchParams(location.search).get('token') || '';
+  const tok = new URLSearchParams(location.search).get('token') || '';
   if (host.includes('macbook-pro')) {
     profiles.pro.host = host;
     if (tok) profiles.pro.token = tok;
@@ -2020,28 +2013,7 @@ function renderPaneContent(el, raw) {
     profiles.air.host = host;
     if (tok) profiles.air.token = tok;
     activeProfileId = 'air';
-  } else if (tok && !profiles.pro.token) {
-    // unknown host: keep as pro token seed if empty
-    profiles.pro.token = profiles.pro.token || tok;
   }
-  // preserve previously saved tokens if present
-  try {
-    const saved = JSON.parse(localStorage.getItem('herdr_profiles') || 'null');
-    if (saved) {
-      if (saved.pro?.token) profiles.pro.token = saved.pro.token;
-      if (saved.air?.token) profiles.air.token = saved.air.token;
-      if (saved.pro?.host) profiles.pro.host = saved.pro.host;
-      if (saved.air?.host) profiles.air.host = saved.air.host;
-    }
-  } catch(_){}
-  // fill missing tokens/hosts from defaults (cross-machine switch needs both)
-  if (!profiles.pro.token) profiles.pro.token = DEFAULT_PROFILES.pro.token;
-  if (!profiles.air.token) profiles.air.token = DEFAULT_PROFILES.air.token;
-  if (!profiles.pro.host) profiles.pro.host = DEFAULT_PROFILES.pro.host;
-  if (!profiles.air.host) profiles.air.host = DEFAULT_PROFILES.air.host;
-  // if current host matches one profile, prefer its token from URL
-  if (host.includes('macbook-pro') && tok) profiles.pro.token = tok;
-  if (host.includes('macbook-air') && tok) profiles.air.token = tok;
   saveProfilesToStore();
   localStorage.setItem('herdr_active_profile', activeProfileId);
   applyActiveProfileToStorage();

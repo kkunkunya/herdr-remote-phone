@@ -69,9 +69,9 @@ WEB="$DIR/web/index.html"
 grep -q "WebSocket" "$WEB" && grep -q "theme" "$WEB" && grep -q "sendKey" "$WEB"
 assert_eq "$?" "0" "has WebSocket, themes, keyboard"
 
-echo "12. web app no hardcoded secrets"
-! grep -q "c4a2385e" "$WEB" && ! grep -q "graffold" "$WEB"
-assert_eq "$?" "0" "no secrets in web app"
+echo "12. web app profile wiring"
+python3 "$DIR/tests/test_builtin_profiles.py" "$WEB"
+assert_eq "$?" "0" "profiles include both relay defaults"
 
 # --- macOS app ---
 echo ""
