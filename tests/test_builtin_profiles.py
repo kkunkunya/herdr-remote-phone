@@ -25,3 +25,5 @@ assert "const legacyToken = raw.token || localStorage.getItem('herdr_relay_token
 assert "profile.host = url;" in web, "manual relay URL must apply to the active profile"
 assert "token: raw.pro?.token || legacyToken || DEFAULT_PROFILES.pro.token" in web, "saved Pro override must survive reload"
 assert "token: raw.air?.token || legacyToken || DEFAULT_PROFILES.air.token" in web, "saved Air override must survive reload"
+assert "function resetProfiles()" in web, "settings must provide a profile reset"
+assert "if (params.has('reset'))" in web, "reset link must clear stale profile storage"

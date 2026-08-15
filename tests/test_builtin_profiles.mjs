@@ -13,7 +13,7 @@ class Storage {
   removeItem(key) { this.values.delete(key); }
 }
 
-function boot(saved = {}) {
+function boot(saved = {}, search = '') {
   const elements = new Map();
   const element = () => ({
     style: {}, classList: { add() {}, remove() {} }, value: '', innerHTML: '', textContent: '',
@@ -30,7 +30,7 @@ function boot(saved = {}) {
     send(message) { this.sent.push(JSON.parse(message)); }
   }
   const context = {
-    console, document, localStorage: new Storage(saved), location: { hostname: 'test.invalid', protocol: 'https:', search: '' },
+    console, document, localStorage: new Storage(saved), location: { hostname: 'test.invalid', protocol: 'https:', search },
     navigator: {}, WebSocket, setTimeout() { return 1; }, clearTimeout() {}, setInterval() { return 1; }, clearInterval() {},
     URLSearchParams, JSON, Date, Math, Promise,
   };
@@ -76,6 +76,35 @@ assert.equal(value(legacy, 'profiles.air.token'), 'legacy-token');
 const partial = boot({ herdr_profiles: JSON.stringify({ pro: { host: 'old-pro' }, token: 'legacy-token' }) });
 assert.equal(value(partial, 'profiles.pro.host'), 'old-pro');
 assert.equal(value(partial, 'profiles.air.token'), 'legacy-token');
+
+const reset = boot({
+  herdr_profiles: JSON.stringify({
+    pro: { host: 'old-pro', token: 'old-token' },
+    air: { host: 'old-air', token: 'old-token' },
+  }),
+  herdr_relay_url: 'wss://old-air',
+  herdr_relay_token: 'old-token',
+  herdr_active_profile: 'air',
+});
+value(reset, 'resetProfiles()');
+assert.equal(value(reset, 'activeProfileId'), 'air');
+assert.equal(value(reset, 'profiles.air.host'), 'macbook-air.kunkunzheten.top');
+assert.notEqual(value(reset, 'profiles.air.token'), 'old-token');
+assert.equal(value(reset, "localStorage.getItem('herdr_relay_url')"), 'wss://macbook-air.kunkunzheten.top');
+assertSocketUsesActiveProfile(reset, reset.sockets.at(-1));
+
+const resetLink = boot({
+  herdr_profiles: JSON.stringify({
+    pro: { host: 'old-pro', token: 'old-token' },
+    air: { host: 'old-air', token: 'old-token' },
+  }),
+  herdr_relay_url: 'wss://old-air',
+  herdr_relay_token: 'old-token',
+  herdr_active_profile: 'air',
+}, '?reset=1');
+assert.equal(value(resetLink, 'profiles.air.host'), 'macbook-air.kunkunzheten.top');
+assert.notEqual(value(resetLink, 'profiles.air.token'), 'old-token');
+assert.equal(value(resetLink, "localStorage.getItem('herdr_relay_url')"), 'wss://macbook-air.kunkunzheten.top');
 
 const push = boot();
 value(push, "pushSubscription = { toJSON() { return { endpoint: 'test' }; } }; connect()");

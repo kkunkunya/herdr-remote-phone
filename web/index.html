@@ -272,6 +272,7 @@ body { font-family: -apple-system, system-ui, -webkit-system-font, sans-serif; b
     <input id="relayToken" type="password" placeholder="shared secret" />
     <button onclick="saveAndConnect()">Connect</button>
     <div class="hint">Run <code>./relay/start.sh</code> to get a URL. <a href="https://github.com/dcolinmorgan/herdr-remote/blob/main/QUICKSTART.md" style="color:var(--blue)">Setup guide →</a></div>
+    <button onclick="resetProfiles()" style="background:var(--border);color:var(--text)">Reset Pro / Air</button>
   </div>
 
 
@@ -1381,6 +1382,19 @@ function loadProfiles() {
 function saveProfilesToStore() {
   localStorage.setItem('herdr_profiles', JSON.stringify(profiles));
 }
+function resetProfiles() {
+  const active = activeProfileId;
+  profiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+  localStorage.removeItem('herdr_profiles');
+  localStorage.removeItem('herdr_relay_url');
+  localStorage.removeItem('herdr_relay_token');
+  activeProfileId = active === 'air' ? 'air' : 'pro';
+  localStorage.setItem('herdr_active_profile', activeProfileId);
+  applyActiveProfileToStorage();
+  fillProfileSettings();
+  renderProfileBar();
+  connect();
+}
 function guessProfileFromLocation() {
   const h = (location.hostname || '').toLowerCase();
   if (h.includes('macbook-air')) return 'air';
@@ -2002,8 +2016,15 @@ function renderPaneContent(el, raw) {
 
 // seed profiles from URL token + host on first load
 (function seedProfiles() {
+  const params = new URLSearchParams(location.search);
+  if (params.has('reset')) {
+    profiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+    localStorage.removeItem('herdr_profiles');
+    localStorage.removeItem('herdr_relay_url');
+    localStorage.removeItem('herdr_relay_token');
+  }
   const host = location.hostname || '';
-  const tok = new URLSearchParams(location.search).get('token') || '';
+  const tok = params.get('token') || '';
   if (host.includes('macbook-pro')) {
     profiles.pro.host = host;
     if (tok) profiles.pro.token = tok;
